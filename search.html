@@ -1,0 +1,80 @@
+<html>
+<head>
+<title>Web App</title>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+    authDomain: "miraclemessages-v2.firebaseapp.com",
+    databaseURL: "https://miraclemessages-v2.firebaseio.com",
+    projectId: "miraclemessages-v2",
+    storageBucket: "miraclemessages-v2.appspot.com",
+    messagingSenderId: "669586730683"
+  };
+  firebase.initializeApp(config);
+</script>
+
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+
+<script lang="text/javascript">
+
+function showAllData()
+{
+  alert("here");
+  var rootRef = db.ref();
+  var contents = "";
+  rootRef.on('value', function(snap){contents += snap.val();});
+  alert(contents);
+
+  var dump = document.getElementById("allData");
+  dump.innerHTML = contents;
+}
+
+function startInsert()
+{
+  var ua = document.getElementById("userArea");
+  ua.src = "insert.html";
+}
+
+function visitSearch(){
+  window.location='/search.html';
+}
+function visitEdit(){
+  window.location='/edit.html';
+}
+function visitAdd(){
+  window.location='/add_new.html';
+}
+function visitMetrics(){
+  window.location='/metrics.html';
+}
+
+</script>
+
+  <form id="newpet" action="">
+    Search by
+<select id="species">
+  <option value="client">Client name</option>
+              <option value="case_date">Date of case (MM/YY)</option>/* TODO month/year format */
+              <option value="volunteer">Volunteer name</option>
+              <option value="worked_on_date">Last worked on date (MM/YY)</option>
+              <option value="status" selected>Delivery status</option> /* TODO options */
+
+    </select>
+    for
+Gender:   <select id="gender">
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+  <option value="x" selected>Unknown</option>
+                </select>
+Age: <input type="text" id="age" width="4">
+</form>
+</body>
+</html>
