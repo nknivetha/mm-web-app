@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>Web App</title>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+    authDomain: "miraclemessages-v2.firebaseapp.com",
+    databaseURL: "https://miraclemessages-v2.firebaseio.com",
+    projectId: "miraclemessages-v2",
+    storageBucket: "miraclemessages-v2.appspot.com",
+    messagingSenderId: "669586730683"
+  };
+  firebase.initializeApp(config);
+</script>
+
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+
+<script lang="text/javascript">
+
+function showAllData()
+{
+  alert("here");
+  var rootRef = db.ref();
+  var contents = "";
+  rootRef.on('value', function(snap){contents += snap.val();});
+  alert(contents);
+
+  var dump = document.getElementById("allData");
+  dump.innerHTML = contents;
+}
+
+function startInsert()
+{
+  var ua = document.getElementById("userArea");
+  ua.src = "insert.html";
+}
+
+function visitSearch(){
+  window.location='/search.html';
+}
+function visitEdit(){
+  window.location='/edit.html';
+}
+function visitAdd(){
+  window.location='https://miraclemessages.org/refer';
+}
+function visitMetrics(){
+  window.location='/metrics.html';
+}
+
+
+
+</script>
+<!--
+        UserName: <input type="text" id="myname"><br/>
+        Password: <input type="text" id="mypass">
+        <input type="button" value="Sign in, please" onclick="signin()">&nbsp;
+        <input type="button" value="Sign out" onclick="signout()"><br/>
+        UID: <input type="text" id="logintoken" value="">
+<hr>
+	Database Contents:<br/>
+	<textarea id="allData" rows="10" cols="60" readonly></textarea>
+	<input type="button" value="Refresh" onclick="showAllData()">
+<hr>
+	<a href="javascript:startInsert()">Insert or Update</a><br/>
+	<a href="javascript:startSearch()">Search for Records</a><br/>
+<hr>
+	<iframe id="userArea" src="" width="600" height="500"
+		style='visible:"true";'>
+	</iframe> -->
+
+    <button type="button" id="search" onclick="visitSearch()">Search</button>
+    <button type="button" id="edit" onclick="visitEdit()">Edit</button>
+    <button type="button" id="add" onclick="visitAdd()">Add</button>
+    <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
+</body>
+</html>

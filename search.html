@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Web App</title>
+<title>Search</title>
 
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
 <script>
@@ -25,56 +25,70 @@
 
 <script lang="text/javascript">
 
-function showAllData()
+function search(type, query)
 {
-  alert("here");
-  var rootRef = db.ref();
-  var contents = "";
-  rootRef.on('value', function(snap){contents += snap.val();});
-  alert(contents);
+  var rootRef = db.getInstance().getReference();
+  var result = "";
+  var column = (function(type) {
+    switch(type) {
+      case 'client':
+        return 10;
+      case 'case_date':
+        return 20;
+      case 'volunteer':
+        return 20;
+      case 'worked_on_date':
+        return 20;
+      case 'status':
+      default:
+        return idk;
 
-  var dump = document.getElementById("allData");
-  dump.innerHTML = contents;
-}
+  })(type);
 
-function startInsert()
-{
-  var ua = document.getElementById("userArea");
-  ua.src = "insert.html";
-}
+  // result += rootRef.orderByChild(column).startAt(query).endAt(query+"\uf8ff");
 
-function visitSearch(){
-  window.location='/search.html';
-}
-function visitEdit(){
-  window.location='/edit.html';
-}
-function visitAdd(){
-  window.location='/add_new.html';
-}
-function visitMetrics(){
-  window.location='/metrics.html';
+
+   ValueEventListener eventListener = new ValueEventListener() {
+     @Override
+     public void onDataChange(DataSnapshot dataSnapshot) {
+         Boolean found;
+         for(DataSnapshot ds : dataSnapshot.getChildren()) {
+             String temp = ds.child(column).getValue(String.class);
+             found = temp.contains(query);
+             if (found) {
+              result += temp; // plus a few other elements
+            }
+         }
+     }
+
+     @Override
+     public void onCancelled(DatabaseError databaseError) {}
+   };
+
+   var dump = document.getElementById("allData");
+   dump.innerHTML = contents;
 }
 
 </script>
 
   <form id="newpet" action="">
     Search by
-<select id="species">
+<select id="type">
   <option value="client">Client name</option>
-              <option value="case_date">Date of case (MM/YY)</option>/* TODO month/year format */
-              <option value="volunteer">Volunteer name</option>
-              <option value="worked_on_date">Last worked on date (MM/YY)</option>
-              <option value="status" selected>Delivery status</option> /* TODO options */
+  <option value="case_date">Date of case (MM/YY)</option>/* TODO month/year format */
+  <option value="volunteer">Volunteer name</option>
+  <option value="worked_on_date">Last worked on date (MM/YY)</option>
+  <option value="status" selected>Delivery status</option> /* TODO options */
+</select>
+for:
+<input type="text" id="query" width="8">
 
-    </select>
-    for
-Gender:   <select id="gender">
-              <option value="m">Male</option>
-              <option value="f">Female</option>
-  <option value="x" selected>Unknown</option>
-                </select>
-Age: <input type="text" id="age" width="4">
+<input type="button" value="Search"" onclick="showAllData()">
+<br>
+
+Results:<br/>
+	<textarea id="allData" rows="10" cols="60" readonly></textarea>
+  /* Link to view/edit/full log*/
 </form>
 </body>
 </html>
