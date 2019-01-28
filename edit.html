@@ -1,7 +1,87 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html>
-<!-- h <link rel="shortcut icon" href=".ico"> -->
+<head>
+    <title>View and Edit</title>
+</head>
 
+<body>
+    <!-- Setup Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+        authDomain: "miraclemessages-v2.firebaseapp.com",
+        databaseURL: "https://miraclemessages-v2.firebaseio.com",
+        projectId: "miraclemessages-v2",
+        storageBucket: "miraclemessages-v2.appspot.com",
+        messagingSenderId: "669586730683"
+      };
+      firebase.initializeApp(config);
+    </script>
 
+    <script>
+        function enableEdit() {
+            // Get a list of all the input elements.
+            let inputs = document.getElementsByTagName("input");
+
+            for (let i = 0; i < inputs.length; i++) {
+                // Make each input editable.
+                inputs[i].readOnly = false;
+            }
+        }
+
+        function save() {
+            // Get a list of all the input elements.
+            let inputs = document.getElementsByTagName("input");
+
+            for (let i = 0; i < inputs.length; i++) {
+                // Disable editing.
+                inputs[i].readOnly = true;
+            }
+        }
+    </script>
+
+    <h3>Client Info</h3>
+    Name <input id="clientName" value="John Doe" readonly></input><br>
+    City <input id="clientCity" readonly></input><br>
+    Birthday <input id="clientBirthday" readonly></input><br>
+    Email <input id="clientEmail" readonly></input><br>
+    How to Contact <input id="clientContactType" readonly></input><br>
+    Phone <input id="clientPhone" readonly></input><br>
+    <hr>
+
+    <h3>Loved Ones</h3>
+    Name <input id="lovedName" readonly></input><br>
+    City <input id="lovedCity" readonly></input><br>
+    Age <input id="lovedAge" readonly></input><br>
+    Email <input id="lovedEmail" readonly></input><br>
+    Phone <input id="lovedPhone" readonly></input><br>
+    Last Location <input id="lovedLocation" readonly></input><br>
+    Relation <input id="lovedRelation" readonly></input><br>
+    Last Connected <input id="lovedLastConnected" readonly></input><br>
+    <hr>
+
+    <h3>Notes</h3>
+    Message <input id="noteMessage" readonly></input><br>
+    Volunteer <input id="noteVolunteer" readonly></input><br>
+    <hr>
+
+    <h3>Status</h3>
+    Reunion <input id="statusReunion" readonly></input><br>
+    Delivery <input id="statusDelivery" readonly></input><br>
+    Home <input id="statusHome" readonly></input><br>
+    Case <input id="statusCase" readonly></input><br>
+    <hr>
+
+    <h3>Volunteer</h3>
+    First Name <input id="volFirstName" readonly></input><br>
+    Middle Name <input id="volMiddleName" readonly></input><br>
+    Last Name <input id="volLastName" readonly></input><br>
+    <hr>
+
+    <button type="button" id="edit" onclick=enableEdit()>Edit</button>
+    <button type="button" id="save" onclick=save()>Save</button>
+</body>
 </html>
