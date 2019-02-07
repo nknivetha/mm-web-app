@@ -25,53 +25,105 @@
 
 <script lang="text/javascript">
 
-function search(type, query)
+var contents = "";
+var clientMatch = "";
+var case_dateMatch = "";
+var volunteerMatch = "";
+var worked_on_dateMatch = "";
+var statusMatch = "";
+
+function searchFilter(snapshot)
 {
-  var rootRef = db.getInstance().getReference();
-  var result = "";
-  var column = (function(type) {
-    switch(type) {
-      case 'client':
-        return 10;
-      case 'case_date':
-        return 20;
-      case 'volunteer':
-        return 20;
-      case 'worked_on_date':
-        return 20;
-      case 'status':
-      default:
-        return idk;
+    allData = snapshot.val();
+    for (k in allData)
+    {
+        oneCase = allData[k];    // JSON
+        // now test to see if any of the criteria fails, if it does, skip this
+        if (clientMatch.length > 0) {
+            if (oneCase.client != clientMatch) continue;
+        }
 
-  })(type);
+        // for the actual fields, find their names and the strings etc.
 
-  // result += rootRef.orderByChild(column).startAt(query).endAt(query+"\uf8ff");
+        contents += (k + " = " + JSON.stringify(oneCase) + "\n");
+    }
 
-
-   ValueEventListener eventListener = new ValueEventListener() {
-     @Override
-     public void onDataChange(DataSnapshot dataSnapshot) {
-         Boolean found;
-         for(DataSnapshot ds : dataSnapshot.getChildren()) {
-             String temp = ds.child(column).getValue(String.class);
-             found = temp.contains(query);
-             if (found) {
-              result += temp; // plus a few other elements
-            }
-         }
-     }
-
-     @Override
-     public void onCancelled(DatabaseError databaseError) {}
-   };
-
-   var dump = document.getElementById("allData");
-   dump.innerHTML = contents;
+    var dump = document.getElementById("results");
+    dump.innerHTML = contents;
 }
+
+function search()
+{
+    contents = "";
+    var myform = document.getElementById("petstats");
+    var el = myform.elements["query"]
+    var fld = myform.elements["type"]; // type
+    switch(fld) {
+          case 'client':
+            clientMatch = el;
+          case 'case_date':
+            case_dateMatch = el;
+          case 'volunteer':
+            volunteerMatch = el;
+          case 'worked_on_date':
+            worked_on_dateMatch = el;
+          case 'status':
+            statusMatch = el;
+          default:
+            return "";
+
+    var searchRef = db.ref('cases'); // not sure...
+    searchRef.orderByKey().on("value", searchFilter);
+}
+
+// function search(type, query)
+// {
+//   var rootRef = db.getInstance().getReference();
+//   var result = "";
+//   var column = (function(type) {
+//     switch(type) {
+//       case 'client':
+//         return 10;
+//       case 'case_date':
+//         return 20;
+//       case 'volunteer':
+//         return 20;
+//       case 'worked_on_date':
+//         return 20;
+//       case 'status':
+//         return
+//       default:
+//         return "";
+//
+//   })(type);
+//
+//   // result += rootRef.orderByChild(column).startAt(query).endAt(query+"\uf8ff");
+//
+//
+//    ValueEventListener eventListener = new ValueEventListener() {
+//      @Override
+//      public void onDataChange(DataSnapshot dataSnapshot) {
+//          Boolean found;
+//          for(DataSnapshot ds : dataSnapshot.getChildren()) {
+//              String temp = ds.child(column).getValue(String.class);
+//              found = temp.contains(query);
+//              if (found) {
+//               result += temp; // plus a few other elements
+//             }
+//          }
+//      }
+//
+//      @Override
+//      public void onCancelled(DatabaseError databaseError) {}
+//    };
+//
+//    var dump = document.getElementById("allData");
+//    dump.innerHTML = contents;
+// }
 
 </script>
 
-  <form id="newpet" action="">
+  <form id="newsearch" action="">
     Search by
 <select id="type">
   <option value="client">Client name</option>
@@ -83,7 +135,8 @@ function search(type, query)
 for:
 <input type="text" id="query" width="8">
 
-<input type="button" value="Search"" onclick="showAllData()">
+<input type="button" value="Search" onclick="search()">
+
 <br>
 
 Results:<br/>
