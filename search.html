@@ -27,7 +27,7 @@
 <script lang="text/javascript">
 var db = firebase.database(app);
 var checkFrom = "";
-var query = "";
+var query;
 
 function searchFilter(snapshot)
 {
@@ -39,24 +39,26 @@ function searchFilter(snapshot)
     {
         oneCase = allData[k];    // JSON
         // var dump = document.getElementById("results");
-        //find the appropriate field to check
+        //find the appropriate field to check, if it contains the query, put it into the list to return
         var checking;
+        if (checkFrom === 'deliveryStatus'){
+           checking = oneCase.deliveryStatus;
+           if (checking == query){
+                contents += oneCase.caseID + '\n';
+           }
+        }
+        else {
+            if (checkFrom === 'name'){
+              checking = String(oneCase.name).toLowerCase();
+          }
+          else if (checkFrom === 'volunteerName'){
+              checking = String(oneCase.volunteerName).toLowerCase();
+          }
+          if (checking.includes(query.toLowerCase())){
+                    contents += oneCase.caseID + '\n';
+          }
+        }
 
-        if (checkFrom === 'name'){
-            checking = String(oneCase.name).toLowerCase();
-        }
-        else if (checkFrom === 'volunteerName'){
-            checking = String(oneCase.volunteerName).toLowerCase();
-        }
-        else if (checkFrom === 'deliveryStatus'){
-           checking = String(oneCase.deliveryStatus).toLowerCase();
-        }
-
-        // dump.innerHTML = checking;
-        //if it contains the query, put it into the list to return
-        if (checking.includes(query.toLowerCase())){
-                  contents += oneCase.caseID + '\n';
-        }
 
     }
 
@@ -86,6 +88,19 @@ function search()
     else if(fld === 'status'){
       searchFrom = 'cases';
       checkFrom = 'deliveryStatus';
+      var sel = myform.elements["s_s"].value
+      if (sel == 'undeliv'){
+        query = 0;
+      }
+      else if (sel == 'deliv'){
+        query = 1;
+      }
+      else if (sel == 'need'){
+        query = -1;
+      }
+      else if (sel == 'no'){
+        query = -2;
+      }
     }
           // case 'case_date':
             // case_dateMatch = el; // where to get date from?
@@ -117,6 +132,7 @@ function search()
   <option value="undeliv">Undelivered</option>
   <option value="deliv">Delivered</option>
   <option value="need">Needs to be delivered</option>
+  <option value="no">No delivery</option>
 </select>
 <input type="button" value="Search" onclick="search()">
 
