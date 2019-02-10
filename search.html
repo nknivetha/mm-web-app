@@ -3,6 +3,7 @@
 <title>Search</title>
 
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
 <script>
   // Initialize Firebase
   var config = {
@@ -13,7 +14,7 @@
     storageBucket: "miraclemessages-v2.appspot.com",
     messagingSenderId: "669586730683"
   };
-  firebase.initializeApp(config);
+  app = firebase.initializeApp(config);
 </script>
 
 </head>
@@ -24,13 +25,13 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
 
 <script lang="text/javascript">
-
+var db = firebase.database(app);
 var contents = "";
-var clientMatch = "";
-var case_dateMatch = "";
-var volunteerMatch = "";
-var worked_on_dateMatch = "";
-var statusMatch = "";
+// var clientMatch = "";
+// var case_dateMatch = "";
+// var volunteerMatch = "";
+// var worked_on_dateMatch = "";
+// var statusMatch = "";
 
 function searchFilter(snapshot)
 {
@@ -40,7 +41,7 @@ function searchFilter(snapshot)
         oneCase = allData[k];    // JSON
         // now test to see if any of the criteria fails, if it does, skip this
         if (clientMatch.length > 0) {
-            if (oneCase.client != clientMatch) continue;
+            if (oneCase.name != clientMatch) continue;
         }
 
         // for the actual fields, find their names and the strings etc.
@@ -55,71 +56,46 @@ function searchFilter(snapshot)
 function search()
 {
     contents = "";
-    var myform = document.getElementById("petstats");
-    var el = myform.elements["query"]
-    var fld = myform.elements["type"]; // type
-    switch(fld) {
-          case 'client':
-            clientMatch = el;
-          case 'case_date':
-            case_dateMatch = el;
-          case 'volunteer':
-            volunteerMatch = el;
-          case 'worked_on_date':
-            worked_on_dateMatch = el;
-          case 'status':
-            statusMatch = el;
-          default:
-            return "";
+    var dump = document.getElementById("results");
 
-    var searchRef = db.ref('cases'); // not sure...
-    searchRef.orderByKey().on("value", searchFilter);
+    var myform = document.getElementById("newsearch");
+    var el = myform.elements["query"].value
+    // dump.innerHTML = el;
+
+    var searchFrom = "";
+    var checkFrom = "";
+    var fld = myform.elements["type"].value; // type
+    // dump.innerHTML = fld.value;
+    if (fld === 'client'){
+            // clientMatch = el;
+            dump.innerHTML = el;
+            searchFrom = 'clients';
+            checkFrom = 'name';
+    }
+    else if (fld === 'volunteer'){
+            // clientMatch = el;
+            // dump.innerHTML = el;
+            searchFrom = 'volunteers';
+            checkFrom = 'volunteerName';
+    }
+    else if(fld === 'status'){
+      searchFrom = 'cases';
+      checkFrom = 'deliveryStatus';
+    }
+          // case 'case_date':
+            // case_dateMatch = el; // where to get date from?
+          // case 'worked_on_date':
+            // worked_on_dateMatch = el; // where to get date from?
+    contents = "";
+    db.ref(searchFrom).orderByChild(checkFrom).equalTo(el).on("value", function(snapshot) {
+    snapshot.forEach(function(data) {
+      contents += data.key;
+      contents += '\n';
+
+    });
+    dump.innerHTML = contents;
+});
 }
-
-// function search(type, query)
-// {
-//   var rootRef = db.getInstance().getReference();
-//   var result = "";
-//   var column = (function(type) {
-//     switch(type) {
-//       case 'client':
-//         return 10;
-//       case 'case_date':
-//         return 20;
-//       case 'volunteer':
-//         return 20;
-//       case 'worked_on_date':
-//         return 20;
-//       case 'status':
-//         return
-//       default:
-//         return "";
-//
-//   })(type);
-//
-//   // result += rootRef.orderByChild(column).startAt(query).endAt(query+"\uf8ff");
-//
-//
-//    ValueEventListener eventListener = new ValueEventListener() {
-//      @Override
-//      public void onDataChange(DataSnapshot dataSnapshot) {
-//          Boolean found;
-//          for(DataSnapshot ds : dataSnapshot.getChildren()) {
-//              String temp = ds.child(column).getValue(String.class);
-//              found = temp.contains(query);
-//              if (found) {
-//               result += temp; // plus a few other elements
-//             }
-//          }
-//      }
-//
-//      @Override
-//      public void onCancelled(DatabaseError databaseError) {}
-//    };
-//
-//    var dump = document.getElementById("allData");
-//    dump.innerHTML = contents;
-// }
 
 </script>
 
@@ -127,21 +103,21 @@ function search()
     Search by
 <select id="type">
   <option value="client">Client name</option>
-  <option value="case_date">Date of case (MM/YY)</option>/* TODO month/year format */
+  <option value="case_date">Date of case (MM/YY)</option> /* TODO month/year format */
   <option value="volunteer">Volunteer name</option>
   <option value="worked_on_date">Last worked on date (MM/YY)</option>
   <option value="status" selected>Delivery status</option> /* TODO options */
 </select>
 for:
 <input type="text" id="query" width="8">
-
 <input type="button" value="Search" onclick="search()">
 
 <br>
 
 Results:<br/>
-	<textarea id="allData" rows="10" cols="60" readonly></textarea>
-  /* Link to view/edit/full log*/
+	<textarea id="results" rows="10" cols="60" readonly></textarea>
+  <!-- /* Link to view/edit/full log*/ -->
+  <!-- case sensitivity -->
 </form>
 </body>
 </html>
