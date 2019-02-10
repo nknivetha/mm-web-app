@@ -26,27 +26,38 @@
 
 <script lang="text/javascript">
 var db = firebase.database(app);
-var contents = "";
-// var clientMatch = "";
-// var case_dateMatch = "";
-// var volunteerMatch = "";
-// var worked_on_dateMatch = "";
-// var statusMatch = "";
+var checkFrom = "";
+var query = "";
 
 function searchFilter(snapshot)
 {
+
+    var contents = "";
     allData = snapshot.val();
+
     for (k in allData)
     {
         oneCase = allData[k];    // JSON
-        // now test to see if any of the criteria fails, if it does, skip this
-        if (clientMatch.length > 0) {
-            if (oneCase.name != clientMatch) continue;
+        // var dump = document.getElementById("results");
+        //find the appropriate field to check
+        var checking;
+
+        if (checkFrom === 'name'){
+            checking = String(oneCase.name).toLowerCase();
+        }
+        else if (checkFrom === 'volunteerName'){
+            checking = String(oneCase.volunteerName).toLowerCase();
+        }
+        else if (checkFrom === 'deliveryStatus'){
+           checking = String(oneCase.deliveryStatus).toLowerCase();
         }
 
-        // for the actual fields, find their names and the strings etc.
+        // dump.innerHTML = checking;
+        //if it contains the query, put it into the list to return
+        if (checking.includes(query.toLowerCase())){
+                  contents += oneCase.caseID + '\n';
+        }
 
-        contents += (k + " = " + JSON.stringify(oneCase) + "\n");
     }
 
     var dump = document.getElementById("results");
@@ -59,22 +70,16 @@ function search()
     var dump = document.getElementById("results");
 
     var myform = document.getElementById("newsearch");
-    var el = myform.elements["query"].value
+    query = myform.elements["query"].value
     // dump.innerHTML = el;
 
-    var searchFrom = "";
-    var checkFrom = "";
     var fld = myform.elements["type"].value; // type
     // dump.innerHTML = fld.value;
     if (fld === 'client'){
-            // clientMatch = el;
-            dump.innerHTML = el;
             searchFrom = 'clients';
             checkFrom = 'name';
     }
     else if (fld === 'volunteer'){
-            // clientMatch = el;
-            // dump.innerHTML = el;
             searchFrom = 'volunteers';
             checkFrom = 'volunteerName';
     }
@@ -86,38 +91,43 @@ function search()
             // case_dateMatch = el; // where to get date from?
           // case 'worked_on_date':
             // worked_on_dateMatch = el; // where to get date from?
-    contents = "";
-    db.ref(searchFrom).orderByChild(checkFrom).equalTo(el).on("value", function(snapshot) {
-    snapshot.forEach(function(data) {
-      contents += data.key;
-      contents += '\n';
 
-    });
-    dump.innerHTML = contents;
-});
+    var searchRef = db.ref(searchFrom);
+
+    searchRef.orderByKey().on("value",searchFilter);
+
+// });
 }
 
 </script>
 
-  <form id="newsearch" action="">
-    Search by
-<select id="type">
-  <option value="client">Client name</option>
-  <option value="case_date">Date of case (MM/YY)</option> /* TODO month/year format */
-  <option value="volunteer">Volunteer name</option>
-  <option value="worked_on_date">Last worked on date (MM/YY)</option>
-  <option value="status" selected>Delivery status</option> /* TODO options */
+<center><form id="newsearch">
+  Search by
+
+<select id="type" onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible'; this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';this.form['query'].style.visibility='visible'};">
+<option value="" selected="selected">Select...</option>
+<option value="client">Client name</option>
+<option value="case_date">Date of case (MM/YY)</option> /* TODO month/year format */
+<option value="volunteer">Volunteer name</option>
+<option value="worked_on_date">Last worked on date (MM/YY)</option>
+<option value="status">Delivery status</option> /* TODO options */
 </select>
-for:
-<input type="text" id="query" width="8">
+<input type="text" id="query" name="query" style="visibility:hidden;">
+<select id="s_s" name="s_s" style="visibility:hidden;">
+  <option value="undeliv">Undelivered</option>
+  <option value="deliv">Delivered</option>
+  <option value="need">Needs to be delivered</option>
+</select>
 <input type="button" value="Search" onclick="search()">
+
+</form>
 
 <br>
 
 Results:<br/>
-	<textarea id="results" rows="10" cols="60" readonly></textarea>
+	<textarea id="results" rows="20" cols="60" readonly></textarea>
   <!-- /* Link to view/edit/full log*/ -->
   <!-- case sensitivity -->
-</form>
+</form></center>
 </body>
 </html>
