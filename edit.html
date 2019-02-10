@@ -7,7 +7,8 @@
 
 <body>
     <!-- Setup Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
     <script>
       // Initialize Firebase
       var config = {
@@ -22,6 +23,7 @@
     </script>
 
     <script>
+        // Allow each input field to be edited.
         function enableEdit() {
             // Get a list of all the input elements.
             let inputs = document.getElementsByTagName("input");
@@ -32,6 +34,7 @@
             }
         }
 
+        // Disable input field editing.
         function save() {
             // Get a list of all the input elements.
             let inputs = document.getElementsByTagName("input");
@@ -41,45 +44,86 @@
                 inputs[i].readOnly = true;
             }
         }
+
+        // Create a printing function for debugging purposes. This tries to
+        // print the id and data of a given document reference.
+        function print_data_from_ref(docRef) {
+            docRef.get().then(function(doc) {
+                if (doc.exists) {
+                    console.log(doc.id, ' => ', doc.data())
+                }
+                else {
+                    console.log('This document does not exist')
+                }
+            });
+        }
+
+        // Create a new section in the HTML to display some data.
+        function appendHTML(header, data) {
+            let section = document.getElementById(header);
+            let html = '';
+
+            // Make sure there is actually some data to add.
+            if (data == null) {
+                console.log('appendHTML is returning early')
+                return;
+            }
+
+            // Add the section to the html.
+            html += '<h3>' + header + '</h3>';
+
+            // Add the data to the html.
+            for (let key in data) {
+                html += key + ": <input id='" + key + "' value='" + data[key] + "' readonly></input><br>";
+            }
+
+            section.innerHTML += html;
+        }
+
+        // Add data to the webpage from a database reference.
+        function addFromRef(dataRef, header) {
+            dataRef.once('value').then(function(snapshot) {
+                // Add the information to the webpage.
+                appendHTML(header, snapshot.val());
+
+                // Print the data for debugging purposes.
+                console.log('(' + snapshot.key + ',' + header + ') =>', snapshot.val());
+            });
+        }
+
+        // Read some documents from the database.
+        function getData(caseID) {
+            let db = firebase.database();
+
+            // Get all of the information for this case.
+            addFromRef(db.ref('cases/' + caseID), 'Case Overview');
+            addFromRef(db.ref('clients/' + caseID), 'Client');
+            addFromRef(db.ref('loved_ones/' + caseID), 'Loved Ones');
+            addFromRef(db.ref('notes/' + caseID), 'Notes');
+            addFromRef(db.ref('records/' + caseID), 'Records');
+            addFromRef(db.ref('volunteers/' + caseID), 'Volunteer');
+
+            let notesRef = db.ref('notes/').orderByChild('caseID').equalTo(caseID);
+            notesRef.once('value').then(function(snapshot) {
+                data = snapshot.val();
+
+                for (let key in data) {
+                    appendHTML('Notes', data[key]);
+                }
+                console.log(snapshot.key, '=>', snapshot.val());
+            });
+        }
+
+        // The first thing we want to do is load a case.
+        getData('Adamearleywine47865');
     </script>
 
-    <h3>Client Info</h3>
-    Name <input id="clientName" value="John Doe" readonly></input><br>
-    City <input id="clientCity" readonly></input><br>
-    Birthday <input id="clientBirthday" readonly></input><br>
-    Email <input id="clientEmail" readonly></input><br>
-    How to Contact <input id="clientContactType" readonly></input><br>
-    Phone <input id="clientPhone" readonly></input><br>
-    <hr>
-
-    <h3>Loved Ones</h3>
-    Name <input id="lovedName" readonly></input><br>
-    City <input id="lovedCity" readonly></input><br>
-    Age <input id="lovedAge" readonly></input><br>
-    Email <input id="lovedEmail" readonly></input><br>
-    Phone <input id="lovedPhone" readonly></input><br>
-    Last Location <input id="lovedLocation" readonly></input><br>
-    Relation <input id="lovedRelation" readonly></input><br>
-    Last Connected <input id="lovedLastConnected" readonly></input><br>
-    <hr>
-
-    <h3>Notes</h3>
-    Message <input id="noteMessage" readonly></input><br>
-    Volunteer <input id="noteVolunteer" readonly></input><br>
-    <hr>
-
-    <h3>Status</h3>
-    Reunion <input id="statusReunion" readonly></input><br>
-    Delivery <input id="statusDelivery" readonly></input><br>
-    Home <input id="statusHome" readonly></input><br>
-    Case <input id="statusCase" readonly></input><br>
-    <hr>
-
-    <h3>Volunteer</h3>
-    First Name <input id="volFirstName" readonly></input><br>
-    Middle Name <input id="volMiddleName" readonly></input><br>
-    Last Name <input id="volLastName" readonly></input><br>
-    <hr>
+    <div id='Case Overview'></div>
+    <div id='Client'></div>
+    <div id='Loved Ones'></div>
+    <div id='Notes'></div>
+    <div id='Records'></div>
+    <div id='Volunteer'></div>
 
     <button type="button" id="edit" onclick=enableEdit()>Edit</button>
     <button type="button" id="save" onclick=save()>Save</button>
