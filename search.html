@@ -26,9 +26,10 @@
 
 <script lang="text/javascript">
 var db = firebase.database(app);
-var checkFrom = "";
-var query;
+var checkFrom = ""; // field to check from
+var query; // user input of what to check for
 
+// Goes through the field, and adds it to the list if it matches the criteria
 function searchFilter(snapshot)
 {
 
@@ -38,8 +39,6 @@ function searchFilter(snapshot)
     for (k in allData)
     {
         oneCase = allData[k];    // JSON
-        // var dump = document.getElementById("results");
-        //find the appropriate field to check, if it contains the query, put it into the list to return
         var checking;
         if (checkFrom === 'deliveryStatus'){
            checking = oneCase.deliveryStatus;
@@ -66,26 +65,26 @@ function searchFilter(snapshot)
     dump.innerHTML = contents;
 }
 
+// Search based on the category and query provided.
 function search()
 {
     contents = "";
     var dump = document.getElementById("results");
 
     var myform = document.getElementById("newsearch");
-    query = myform.elements["query"].value
-    // dump.innerHTML = el;
 
-    var fld = myform.elements["type"].value; // type
-    // dump.innerHTML = fld.value;
-    if (fld === 'client'){
+    query = myform.elements["query"].value //value of query
+    var fld = myform.elements["type"].value; // type of search
+
+    if (fld === 'client'){ //search by client name
             searchFrom = 'clients';
             checkFrom = 'name';
     }
-    else if (fld === 'volunteer'){
+    else if (fld === 'volunteer'){ //search by volunteer name
             searchFrom = 'volunteers';
             checkFrom = 'volunteerName';
     }
-    else if(fld === 'status'){
+    else if(fld === 'status'){ //search by case status
       searchFrom = 'cases';
       checkFrom = 'deliveryStatus';
       var sel = myform.elements["s_s"].value
@@ -110,8 +109,6 @@ function search()
     var searchRef = db.ref(searchFrom);
 
     searchRef.orderByKey().on("value",searchFilter);
-
-// });
 }
 
 </script>
@@ -119,14 +116,17 @@ function search()
 <center><form id="newsearch">
   Search by
 
-<select id="type" onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible'; this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';this.form['query'].style.visibility='visible'};">
+<select id="type" onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
+this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';
+this.form['query'].style.visibility='visible'};">
 <option value="" selected="selected">Select...</option>
 <option value="client">Client name</option>
 <option value="case_date">Date of case (MM/YY)</option> /* TODO month/year format */
 <option value="volunteer">Volunteer name</option>
 <option value="worked_on_date">Last worked on date (MM/YY)</option>
-<option value="status">Delivery status</option> /* TODO options */
+<option value="status">Delivery status</option>
 </select>
+
 <input type="text" id="query" name="query" style="visibility:hidden;">
 <select id="s_s" name="s_s" style="visibility:hidden;">
   <option value="undeliv">Undelivered</option>
@@ -141,9 +141,8 @@ function search()
 <br>
 
 Results:<br/>
-	<textarea id="results" rows="20" cols="60" readonly></textarea>
+	<textarea id="results" rows="20" cols="100" readonly></textarea>
   <!-- /* Link to view/edit/full log*/ -->
-  <!-- case sensitivity -->
 </form></center>
 </body>
 </html>
