@@ -23,6 +23,36 @@
     </script>
 
     <script>
+        const db = firebase.database();
+        const caseID = 'Adamearleywine88340';
+
+        // Setup contant dictionaries to map from the database collection names,
+        // such as 'loved_ones', to the header names, such as 'Loved Ones'.
+        const collToHeader = {'cases': 'Case Overview',
+                              'clients': 'Client',
+                              'loved_ones': 'Loved Ones',
+                              'notes': 'Notes',
+                              'records': 'Records',
+                              'volunteers': 'Volunteer'};
+        const headerToColl = reverseDict(collToHeader);
+
+        // Setup a dictionary for the unedited data so that when data is saved,
+        // only changed data will be saved.
+        let originalData = {};
+
+
+        // Create a helper function to reverse a dictionary.
+        function reverseDict(dict) {
+            let rev = {};
+
+            for (let key in dict) {
+                // Reverse the (key, value) pair.
+                rev[dict[key]] = key;
+            }
+
+            return rev;
+        }
+
         // Allow each input field to be edited.
         function enableEdit() {
             // Get a list of all the input elements.
@@ -34,38 +64,89 @@
             }
         }
 
-        // Disable input field editing.
-        function save() {
-            // Get a list of all the input elements.
-            let inputs = document.getElementsByTagName("input");
-
-            for (let i = 0; i < inputs.length; i++) {
-                // Disable editing.
-                inputs[i].readOnly = true;
+        // Disallow edits of input fields.
+        function disableEdit(fields) {
+            for (let i = 0; i < fields.length; i++) {
+                fields[i].readOnly = true;
             }
         }
 
-        // Create a printing function for debugging purposes. This tries to
-        // print the id and data of a given document reference.
-        function print_data_from_ref(docRef) {
-            docRef.get().then(function(doc) {
-                if (doc.exists) {
-                    console.log(doc.id, ' => ', doc.data())
+        // Find data that was altered.
+        function getAlteredData(fields) {
+            let alteredData = {};
+
+            console.log('get altered data: original data:', originalData);
+
+            for (let i = 0; i < fields.length; i++) {
+                // Find the firebase collection that this field is in.
+                parentColl = headerToColl[fields[i].parentNode.id];
+
+                // Check if this field was changed.
+                let path = parentColl + '/' + fields[i].id;
+
+                if (originalData[path] != fields[i].value) {
+                    // This field was changed.
+                    alteredData[path] = fields[i].value;
                 }
-                else {
-                    console.log('This document does not exist')
-                }
-            });
+            }
+
+            console.log('get altered data: altered data:', alteredData);
+            return alteredData;
+        }
+
+        // Write altered data to the database.
+        function writeData(fields) {
+            // Find the altered data.
+            const alteredData = getAlteredData(fields);
+
+            // Update the fields.
+            for (let key in alteredData) {
+                // The key is in the form 'cases/id/field', so we have to
+                // extract the path and field.
+                const pathEnd = key.lastIndexOf('/');
+                const path = key.substring(0, pathEnd);
+                const field = key.substring(pathEnd + 1);
+
+                let newData = {};
+                newData[field] = alteredData[key];
+
+                db.ref(path).update(newData);
+            }
+
+            // Update the originalData dictionary so that if you change field A
+            // and then save, then change field A back to its original value
+            // and save again, the final value for A in the database will be
+            // the original.
+            for (let key in alteredData) {
+                originalData[key] = alteredData[key];
+            }
+        }
+
+        // Disable input field editing and write data to the database.
+        function save() {
+            // Get a list of all the input elements.
+            let fields = document.getElementsByTagName("input");
+
+            // Disable editing and save changes to the database.
+            disableEdit(fields);
+            writeData(fields);
         }
 
         // Create a new section in the HTML to display some data.
-        function appendHTML(header, data) {
+        function appendHTML(header, data, id) {
             let section = document.getElementById(header);
             let html = '';
 
+            // The id should be the identifier so clients/id (for example) holds
+            // the given data. The id is used when saving data to check which
+            // data was actually updated.
+            if (id == undefined) {
+                id = caseID;
+            }
+
             // Make sure there is actually some data to add.
             if (data == null) {
-                console.log('appendHTML is returning early')
+                console.log('appendHTML is returning early for header', header)
                 return;
             }
 
@@ -74,7 +155,12 @@
 
             // Add the data to the html.
             for (let key in data) {
-                html += key + ": <input id='" + key + "' value='" + data[key] + "' readonly></input><br>";
+                let tagID = id + '/' + key
+                html += key + ": <input id='" + tagID + "' value='" + data[key] + "' readonly></input><br>";
+
+                // Add this data to the originalData dictionary.
+                let path = headerToColl[header] + '/' + id + '/' + key;
+                originalData[path] = data[key];
             }
 
             section.innerHTML += html;
@@ -92,14 +178,13 @@
         }
 
         // Read some documents from the database.
-        function getData(caseID) {
-            let db = firebase.database();
+        function getData() {
+            console.log('get data caseID:', caseID);
 
             // Get all of the information for this case.
             addFromRef(db.ref('cases/' + caseID), 'Case Overview');
             addFromRef(db.ref('clients/' + caseID), 'Client');
             addFromRef(db.ref('loved_ones/' + caseID), 'Loved Ones');
-            addFromRef(db.ref('notes/' + caseID), 'Notes');
             addFromRef(db.ref('records/' + caseID), 'Records');
             addFromRef(db.ref('volunteers/' + caseID), 'Volunteer');
 
@@ -108,14 +193,15 @@
                 data = snapshot.val();
 
                 for (let key in data) {
-                    appendHTML('Notes', data[key]);
+                    console.log('finding notes. key:', key);
+                    appendHTML('Notes', data[key], key);
                 }
                 console.log(snapshot.key, '=>', snapshot.val());
             });
         }
 
-        // The first thing we want to do is load a case.
-        getData('Adamearleywine47865');
+        // Load a case.
+        getData();
     </script>
 
     <div id='Case Overview'></div>
