@@ -33,7 +33,7 @@ var query; // user input of what to check for
 function searchFilter(snapshot)
 {
 
-    var contents = "";
+    var contents = [];
     allData = snapshot.val();
 
     for (k in allData)
@@ -43,7 +43,7 @@ function searchFilter(snapshot)
         if (checkFrom === 'deliveryStatus'){
            checking = oneCase.deliveryStatus;
            if (checking == query){
-                contents += oneCase.caseID + '\n';
+                contents.push(String(oneCase.caseID));
            }
         }
         else {
@@ -54,7 +54,7 @@ function searchFilter(snapshot)
               checking = String(oneCase.volunteerName).toLowerCase();
           }
           if (checking.includes(query.toLowerCase())){
-                    contents += oneCase.caseID + '\n';
+                    contents.push(String(oneCase.caseID));
           }
         }
 
@@ -62,7 +62,13 @@ function searchFilter(snapshot)
     }
 
     var dump = document.getElementById("results");
-    dump.innerHTML = contents;
+
+    var fixedCase = contents[0].replace(/\d+$/, "")
+    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '">' + fixedCase + '</a> </th> </tr>';
+    for (var i = 1; i < contents.length; i++) {
+      fixedCase = contents[i].replace(/\d+$/, "")
+      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '">' + fixedCase + '</a> </th> </tr>';
+    }
 }
 
 // Search based on the category and query provided.
@@ -141,7 +147,10 @@ this.form['query'].style.visibility='visible'};">
 <br>
 
 Results:<br/>
-	<textarea id="results" rows="20" cols="100" readonly></textarea>
+<div style="height:400px; width:500px; overflow:auto; border:1px solid black">
+  <table id="results" style="width:40%"> 
+  </table>
+</div>
   <!-- /* Link to view/edit/full log*/ -->
 </form></center>
 </body>

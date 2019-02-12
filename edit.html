@@ -24,7 +24,7 @@
 
     <script>
         const db = firebase.database();
-        const caseID = 'Adamearleywine88340';
+        const caseID = getURLParams()["caseID"];
 
         // Setup contant dictionaries to map from the database collection names,
         // such as 'loved_ones', to the header names, such as 'Loved Ones'.
@@ -40,6 +40,14 @@
         // only changed data will be saved.
         let originalData = {};
 
+
+        function getURLParams() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+                vars[key] = value;
+            });
+            return vars;
+        }
 
         // Create a helper function to reverse a dictionary.
         function reverseDict(dict) {
