@@ -140,6 +140,41 @@
             writeData(fields);
         }
 
+        // Format the field names in the database so they are better to read.
+        // For instance, 'lastKnownLocation' should be 'Last Known Location'
+        // and 'caseID' should be 'Case ID'.
+        function formatWords(field) {
+            // Add a space before each capital letter unless it was immediately
+            // preceded by a capital letter. This makes sure that 'caseID' does
+            // not become 'Case I D'.
+            let newField = '';
+            let prevCapital = false;
+
+            for (let i = 0; i < field.length; i++) {
+                const ch = field.charAt(i);
+
+                // Check if the previous character was not capitalized and the
+                // current character is a capital letter.
+                if (/[A-Z]/.test(ch) && !prevCapital) {
+                    newField += ' ';
+                }
+
+                newField += ch;
+
+                // Update prevCapital.
+                prevCapital = false;
+
+                if (/[A-Z]/.test(ch)) {
+                    prevCapital = true;
+                }
+            }
+
+            // Capitalize the first character of newField.
+            newField = newField[0].toUpperCase() + newField.substr(1);
+
+            return newField;
+        }
+
         // Create a new section in the HTML to display some data.
         function appendHTML(header, data, id) {
             let section = document.getElementById(header);
@@ -164,7 +199,8 @@
             // Add the data to the html.
             for (let key in data) {
                 let tagID = id + '/' + key
-                html += key + ": <input id='" + tagID + "' value='" + data[key] + "' readonly></input><br>";
+                const label = formatWords(key)
+                html += label + ": <input id='" + tagID + "' value='" + data[key] + "' readonly></input><br>";
 
                 // Add this data to the originalData dictionary.
                 let path = headerToColl[header] + '/' + id + '/' + key;
@@ -187,8 +223,6 @@
 
         // Read some documents from the database.
         function getData() {
-            console.log('get data caseID:', caseID);
-
             // Get all of the information for this case.
             addFromRef(db.ref('cases/' + caseID), 'Case Overview');
             addFromRef(db.ref('clients/' + caseID), 'Client');
