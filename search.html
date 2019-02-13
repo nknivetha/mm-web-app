@@ -57,12 +57,16 @@ function searchFilter(snapshot)
                     contents += oneCase.caseID + '\n';
           }
         }
-
-
     }
 
     var dump = document.getElementById("results");
-    dump.innerHTML = contents;
+    if (contents == ""){
+      dump.innerHTML = "No results found."
+    }
+    else{
+
+      dump.innerHTML = contents;
+    }
 }
 
 // Search based on the category and query provided.
