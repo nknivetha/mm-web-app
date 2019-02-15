@@ -175,6 +175,24 @@
             return newField;
         }
 
+        // Create a string that is the same as the input string except single
+        // quotes are replaced with the HTML entity for a single quote.
+        function escapeSingleQuotes(original) {
+            let replaced = '';
+
+            for (let i = 0; i < original.length; i++) {
+                if (original.charAt(i) == '\'') {
+                    // Add the HTML entity for a single quote.
+                    replaced += "&#39";
+                }
+                else {
+                    replaced += original.charAt(i);
+                }
+            }
+
+            return replaced;
+        }
+
         // Create a new section in the HTML to display some data.
         function appendHTML(header, data, id) {
             let section = document.getElementById(header);
@@ -200,7 +218,13 @@
             for (let key in data) {
                 let tagID = id + '/' + key
                 const label = formatWords(key)
-                html += label + ": <input id='" + tagID + "' value='" + data[key] + "' readonly></input><br>";
+
+                // When setting the value of the HTML tag, we wrap the text in
+                // single quotes so that multiple words can be displayed.
+                // However, the text could have single quotes, so we have to
+                // convert them to the appropriate HTML entity.
+                const value = escapeSingleQuotes(data[key]);
+                html += label + ": <input id='" + tagID + "' value='" + value + "' readonly></input><br>";
 
                 // Add this data to the originalData dictionary.
                 let path = headerToColl[header] + '/' + id + '/' + key;
