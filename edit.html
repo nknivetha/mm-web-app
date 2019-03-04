@@ -40,7 +40,8 @@
         // only changed data will be saved.
         let originalData = {};
 
-
+        // Get case ID parameters from the URL (generated and passed in
+        // by search.html)
         function getURLParams() {
             var vars = {};
             var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -119,6 +120,19 @@
                 newData[field] = alteredData[key];
 
                 db.ref(path).update(newData);
+
+                // Add to the audit log object for this case and record
+                // the original data. First create the appropriate path
+                // (/audits/path/numUpdate)
+                const addr = 'audits/'+path+'/2';
+                const numUpdate = 2;
+                if (db.ref(addr) != null) {
+                  numUpdate += 1;
+                  addr = 'audits/'+path+'/'+String(numUpdate);
+                }
+                console.log(addr);
+                // Then create the audit log object in the db
+                db.ref(addr).setData(originalData);
             }
 
             // Update the originalData dictionary so that if you change field A
