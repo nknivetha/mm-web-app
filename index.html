@@ -13,7 +13,7 @@
     storageBucket: "miraclemessages-v2.appspot.com",
     messagingSenderId: "669586730683"
   };
-  firebase.initializeApp(config);
+  var app = firebase.initializeApp(config);
 </script>
 
 </head>
@@ -55,31 +55,55 @@ function visitAdd(){
 function visitMetrics(){
   window.location='/metrics.html';
 }
+// function visitAdmin(){
+//   window.location='/metrics.html';
+// }
 
 
+    var auth = firebase.auth(app);
 
+    function signin_good(user)
+    {
+        // this function might get hit twice, first with user null
+        if (user != null)
+            window.location.href = "/search.html";
+    }
+
+    function signin_catch(error)
+    {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        alert(error.message);
+    }
+
+    function signin()
+    {
+        var email = document.getElementById("myname").value;
+        var pword = document.getElementById("mypass").value;
+        auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
+
+    }
+    
+  function showDiv() {
+   document.getElementById('login').style.visibility = "visible";
+  }
 </script>
-<!--
-        UserName: <input type="text" id="myname"><br/>
-        Password: <input type="text" id="mypass">
-        <input type="button" value="Sign in, please" onclick="signin()">&nbsp;
-        <input type="button" value="Sign out" onclick="signout()"><br/>
-        UID: <input type="text" id="logintoken" value="">
-<hr>
-	Database Contents:<br/>
-	<textarea id="allData" rows="10" cols="60" readonly></textarea>
-	<input type="button" value="Refresh" onclick="showAllData()">
-<hr>
-	<a href="javascript:startInsert()">Insert or Update</a><br/>
-	<a href="javascript:startSearch()">Search for Records</a><br/>
-<hr>
-	<iframe id="userArea" src="" width="600" height="500"
-		style='visible:"true";'>
-	</iframe> -->
 
     <button type="button" id="search" onclick="visitSearch()">Search</button>
     <button type="button" id="edit" onclick="visitEdit()">Edit</button>
     <button type="button" id="add" onclick="visitAdd()">Add</button>
     <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
+    <button type="button" id="metrics" onclick="showDiv()">Admin</button>
+
+
+    <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
+this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';
+this.form['query'].style.visibility='visible'};" -->
+    <div id="login" style="visibility:hidden;">
+
+    E-mail: <input type="text" id="myname"><br/>
+    Password: <input type="text" id="mypass">
+    <input type="button" value="Sign in" onclick="signin()">
+  </div>
 </body>
 </html>
