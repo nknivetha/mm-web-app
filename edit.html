@@ -2,7 +2,7 @@
 
 <html>
 <head>
-        
+
     <title>View and Edit</title>
 </head>
 
@@ -10,9 +10,8 @@
     <!-- Setup Firebase -->
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 
-    
     <script>
             var config = {
                   apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
@@ -26,16 +25,17 @@
      </script>
 
     <script>
-                // Initialize Firebase
-                var auth = app.auth()
-                auth.onAuthStateChanged(function(user) {
-                    if (user) {
-                        // User is signed in.
-                    } else {
-                        alert("not logged in");
-                        window.location.href = 'index.html'; 
-                    }
-                });
+        // Initialize Firebase
+        var auth = app.auth()
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                // User is signed in.
+            } else {
+                alert("not logged in");
+                window.location.href = 'index.html';
+            }
+        });
+
         const db = firebase.database();
         const caseID = getURLParams()["caseID"];
 
@@ -48,8 +48,7 @@
                               'records': 'Records',
                               'volunteers': 'Volunteer'};
         const headerToColl = reverseDict(collToHeader);
-        
-        
+
         // Setup a dictionary for the unedited data so that when data is saved,
         // only changed data will be saved.
         let originalData = {};
@@ -122,40 +121,48 @@
             // Find the altered data.
             const alteredData = getAlteredData(fields);
 
-            // Update the fields.
-            for (let key in alteredData) {
-                // The key is in the form 'cases/id/field', so we have to
-                // extract the path and field.
-                const pathEnd = key.lastIndexOf('/');
-                const path = key.substring(0, pathEnd);
-                const field = key.substring(pathEnd + 1);
+            db.ref('proposed/id').once('value').then(function(snapshot) {
+                // Get the next proposal ID. The '+ 1 - 1' is to convert null
+                // to 0 becuase if the 'proposed' collection is not in the
+                // database, then 'proposed/id' will be null.
+                proposalID = snapshot.val() + 1 - 1;
 
-                let newData = {};
-                newData[field] = alteredData[key];
+                // Update the proposal ID.
+                const newID = (proposalID + Object.keys(alteredData).length) % 4000000000;
+                db.ref('proposed').update({id: newID});
 
-                db.ref(path).update(newData);
+                // Update the fields.
+                for (let key in alteredData) {
+                    // The key is in the form 'cases/id/field', so we have to
+                    // extract the path and field.
+                    const pathEnd = key.lastIndexOf('/');
+                    const path = key.substring(0, pathEnd);
+                    const field = key.substring(pathEnd + 1);
 
-                // Add to the audit log object for this case and record
-                // the original data. First create the appropriate path
-                // (/audits/path/numUpdate)
-                const addr = 'audits/'+path+'/2';
-                const numUpdate = 2;
-                if (db.ref(addr) != null) {
-                  numUpdate += 1;
-                  addr = 'audits/'+path+'/'+String(numUpdate);
+                    let newData = {};
+                    newData[field] = alteredData[key];
+
+                    // Check if the user is admin.
+                    const admin = false;
+                    if (admin) {
+                        // Write the data directly to the database.
+                        db.ref(path).update(newData);
+                    }
+                    else {
+                        // Enqueue the proposed edit to be approved by admin.
+                        db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                        proposalID += 1
+                    }
                 }
-                console.log(addr);
-                // Then create the audit log object in the db
-                db.ref(addr).setData(originalData);
-            }
 
-            // Update the originalData dictionary so that if you change field A
-            // and then save, then change field A back to its original value
-            // and save again, the final value for A in the database will be
-            // the original.
-            for (let key in alteredData) {
-                originalData[key] = alteredData[key];
-            }
+                // Update the originalData dictionary so that if you change field A
+                // and then save, then change field A back to its original value
+                // and save again, the final value for A in the database will be
+                // the original.
+                for (let key in alteredData) {
+                    originalData[key] = alteredData[key];
+                }
+            });
         }
 
         // Disable input field editing and write data to the database.
