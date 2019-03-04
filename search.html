@@ -23,18 +23,31 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
 
 <script lang="text/javascript">
 var db = firebase.database(app);
 var checkFrom = ""; // field to check from
 var query; // user input of what to check for
 var auth = app.auth();
-var user = auth.currentUser;
-if (user) {
-//blank if correct login
-} else {
-window.location.href = 'index.html'; 
-}
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    console.log(user);
+    // User is signed in.
+  } else {
+    alert("not logged in");
+    window.location.href = 'index.html'; 
+  }
+});
+// var user = auth.currentUser;
+
+// if (user) {
+// //blank if correct login
+// } else {
+//   alert("not logged in");
+// window.location.href = 'index.html'; 
+// }
 
 // Goes through the field, and adds it to the list if it matches the criteria
 function searchFilter(snapshot)

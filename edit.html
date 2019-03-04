@@ -2,6 +2,7 @@
 
 <html>
 <head>
+        
     <title>View and Edit</title>
 </head>
 
@@ -9,20 +10,32 @@
     <!-- Setup Firebase -->
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
+    
     <script>
-      // Initialize Firebase
-      var config = {
-        apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-        authDomain: "miraclemessages-v2.firebaseapp.com",
-        databaseURL: "https://miraclemessages-v2.firebaseio.com",
-        projectId: "miraclemessages-v2",
-        storageBucket: "miraclemessages-v2.appspot.com",
-        messagingSenderId: "669586730683"
-      };
-      firebase.initializeApp(config);
-    </script>
+            var config = {
+                  apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+                  authDomain: "miraclemessages-v2.firebaseapp.com",
+                  databaseURL: "https://miraclemessages-v2.firebaseio.com",
+                  projectId: "miraclemessages-v2",
+                  storageBucket: "miraclemessages-v2.appspot.com",
+                  messagingSenderId: "669586730683"
+                };
+              app = firebase.initializeApp(config);
+     </script>
 
     <script>
+                // Initialize Firebase
+                var auth = app.auth()
+                auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        // User is signed in.
+                    } else {
+                        alert("not logged in");
+                        window.location.href = 'index.html'; 
+                    }
+                });
         const db = firebase.database();
         const caseID = getURLParams()["caseID"];
 
@@ -35,7 +48,8 @@
                               'records': 'Records',
                               'volunteers': 'Volunteer'};
         const headerToColl = reverseDict(collToHeader);
-
+        
+        
         // Setup a dictionary for the unedited data so that when data is saved,
         // only changed data will be saved.
         let originalData = {};

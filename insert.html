@@ -15,6 +15,14 @@
 
   var app = firebase.initializeApp(config);
   var db = firebase.database(app);
+  var auth = app.auth();
+var user = auth.currentUser;
+if (user) {
+//blank if correct login
+} else {
+window.location.href = 'index.html'; 
+}
+
 </script>
 
 </head>
@@ -25,6 +33,7 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-database.js"></script>
 
 <script lang="text/javascript">
+
 function insert()
 {
   var tx1 = "pet/";
