@@ -37,7 +37,9 @@
         });
 
         const db = firebase.database();
-        const caseID = getURLParams()["caseID"];
+        const URLParams = getURLParams();
+        const caseID = URLParams["caseID"];
+        const isAdmin = (URLParams["isAdmin"] === 'true');
 
         // Setup contant dictionaries to map from the database collection names,
         // such as 'loved_ones', to the header names, such as 'Loved Ones'.
@@ -142,9 +144,7 @@
                     let newData = {};
                     newData[field] = alteredData[key];
 
-                    // Check if the user is admin.
-                    const admin = false;
-                    if (admin) {
+                    if (isAdmin) {
                         // Write the data directly to the database.
                         db.ref(path).update(newData);
                     }

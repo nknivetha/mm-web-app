@@ -20,7 +20,7 @@ exports.logCaseAdded = functions.database.ref('')
       const coll = snapshot.ref.parent.key;
 
       // Make sure the addition isn't in the audits or queue collections
-      if (coll != 'audits' && col1 != 'queue') {
+      if (coll != 'audits' && col1 != 'proposed') {
 
             // Grab the current value of what was written to the Realtime Database.
             const added = snapshot();
@@ -44,7 +44,7 @@ exports.logCaseUpdated = functions.database.instance('miraclemessages-v2').ref('
       const col1 = context.params.coll
 
       // Make sure the change isn't being made in the audits or queue collections
-      if (col1 != 'audits' && col1 != 'queue') {
+      if (col1 != 'audits' && col1 != 'proposed') {
 
             // Get the datasnapshot before the change was made
             const old = change.before;
@@ -76,7 +76,7 @@ exports.logCaseDeleted = functions.database.ref('')
       const coll = old.ref().parent.key;
 
       // Make sure the delete isn't happening in the audits or queue collections
-      if (coll != 'audits' && col1 != 'queue') {
+      if (coll != 'audits' && col1 != 'proposed') {
 
             // Get the datasnapshot before the change was made
             const old = change.before;

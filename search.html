@@ -31,13 +31,19 @@ var db = firebase.database(app);
 var checkFrom = ""; // field to check from
 var query; // user input of what to check for
 var auth = app.auth();
+var isAdmin = false;
+
+// Check if user is signed in - only allow access to the page if they are
+// If not logged into the admin account, redirect to the volunteer
+// search page.
 auth.onAuthStateChanged(function(user) {
   if (user) {
+    isAdmin = true;
     console.log(user);
     // User is signed in.
   } else {
     alert("not logged in");
-    window.location.href = 'index.html'; 
+    window.location.href = 'volunteerSearch.html'; 
   }
 });
 // var user = auth.currentUser;
@@ -82,10 +88,10 @@ function searchFilter(snapshot)
     var dump = document.getElementById("results");
 
     var fixedCase = contents[0].replace(/\d+$/, "")
-    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '">' + fixedCase + '</a> </th> </tr>';
+    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
     for (var i = 1; i < contents.length; i++) {
       fixedCase = contents[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '">' + fixedCase + '</a> </th> </tr>';
+      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
     }
 }
 

@@ -28,6 +28,7 @@
 var db = firebase.database(app);
 var checkFrom = ""; // field to check from
 var query; // user input of what to check for
+const isAdmin = false;
 
 // Goes through the field, and adds it to the list if it matches the criteria
 function searchFilter(snapshot)
@@ -53,10 +54,10 @@ function searchFilter(snapshot)
     var dump = document.getElementById("results");
 
     var fixedCase = contents[0].replace(/\d+$/, "")
-    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '">' + fixedCase + '</a> </th> </tr>';
+    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
     for (var i = 1; i < contents.length; i++) {
       fixedCase = contents[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '">' + fixedCase + '</a> </th> </tr>';
+      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
     }
 }
 
