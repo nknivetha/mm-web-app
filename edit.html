@@ -26,15 +26,7 @@
 
     <script>
         // Initialize Firebase
-        var auth = app.auth()
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                // User is signed in.
-            } else {
-                alert("not logged in");
-                window.location.href = 'index.html';
-            }
-        });
+
 
         const db = firebase.database();
         const URLParams = getURLParams();
@@ -123,6 +115,17 @@
             // Find the altered data.
             const alteredData = getAlteredData(fields);
 
+            // Collect the current date time
+            var today = new Date;
+            var sec = today.getSeconds();
+            var min = today.getMinutes();
+            var hr = today.getHours();
+            var day = today.getDate();
+            var month = today.getMonth() + 1;
+            var year = today.getFullYear();
+
+            var dateTime = str(hr) + ':' + str(min) + ':' + str(sec) + '::' + str(month) + '/' + str(day) + '/' + str(year);
+
             db.ref('proposed/id').once('value').then(function(snapshot) {
                 // Get the next proposal ID. The '+ 1 - 1' is to convert null
                 // to 0 becuase if the 'proposed' collection is not in the
@@ -146,10 +149,17 @@
 
                     if (isAdmin) {
                         // Write the data directly to the database.
+                        // and store a copy in the audit log (with the
+                        // current dateTime stored as well)
                         db.ref(path).update(newData);
+                        newData['dateTime'] = dateTime;
+                        db.ref('audits/' + path).set(newData);
                     }
                     else {
                         // Enqueue the proposed edit to be approved by admin.
+                        // Include the dateTime (should be removed when
+                        // storing the data in the actual collections tho)
+                        newData['dateTime'] = dateTime;
                         db.ref('proposed/' + proposalID + '/' + path).set(newData);
                         proposalID += 1
                     }
