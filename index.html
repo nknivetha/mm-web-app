@@ -64,9 +64,15 @@ function visitMetrics(){
 
     function signin_good(user)
     {
+      console.log(user);
+
         // this function might get hit twice, first with user null
-        if (user != null)
+        if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
+        // jess's UID
             window.location.href = "search.html";
+        else (
+            window.location.href = "volunteerCases.html";
+        )
     }
 
     function signin_catch(error)
@@ -81,11 +87,38 @@ function visitMetrics(){
         var email = document.getElementById("myname").value;
         var pword = document.getElementById("mypass").value;
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
-
+        auth.setPersistence(firebase.auth.Auth.Persistance.SESSION).then(
+          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);}
+                                                                          );
     }
-    
+
   function showDiv() {
    document.getElementById('login').style.visibility = "visible";
+  }
+
+  function showDivCreate() {
+   document.getElementById('create').style.visibility = "visible";
+  }
+
+
+  function createUser(){
+    var email = document.getElementById("mynamec").value;
+    var pword = document.getElementById("mypassc").value;
+    auth.createUserWithEmailAndPassword(email, pword).then(function(user) {
+
+    var user = firebase.auth().currentUser;
+    console.log(user);
+    addCase() // go to html page
+    }, function(error) {
+        console.log(error.code);
+        var errorCode = error.code;
+        var errorMessage = error.message;
+    });
+  }
+
+  function addCase(){
+    // go to cases corresponding to UID
+
   }
 </script>
 
@@ -93,7 +126,10 @@ function visitMetrics(){
     <button type="button" id="edit" onclick="visitEdit()">Edit</button>
     <button type="button" id="add" onclick="visitAdd()">Add</button>
     <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
-    <button type="button" id="metrics" onclick="showDiv()">Admin</button>
+    <button type="button" id="metrics" onclick="showDiv()">Login</button>
+    <button type="button" id="metrics" onclick="showDivCreate()">Create New User</button>
+
+
 
 
     <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
@@ -105,5 +141,11 @@ this.form['query'].style.visibility='visible'};" -->
     Password: <input type="text" id="mypass">
     <input type="button" value="Sign in" onclick="signin()">
   </div>
+  <div id="create" style="visibility:hidden;">
+
+  E-mail: <input type="text" id="mynamec"><br/>
+  Password: <input type="text" id="mypassc">
+  <input type="button" value="Create User" onclick="createUser()">
+</div>
 </body>
 </html>
