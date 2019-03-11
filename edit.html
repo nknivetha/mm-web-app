@@ -124,7 +124,8 @@
             var month = today.getMonth() + 1;
             var year = today.getFullYear();
 
-            var dateTime = str(hr) + ':' + str(min) + ':' + str(sec) + '::' + str(month) + '/' + str(day) + '/' + str(year);
+            // var dateTime = str(hr) + ':' + str(min) + ':' + str(sec) + '::' + str(month) + '/' + str(day) + '/' + str(year);
+            var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
 
             db.ref('proposed/id').once('value').then(function(snapshot) {
                 // Get the next proposal ID. The '+ 1 - 1' is to convert null
@@ -161,6 +162,7 @@
                         // storing the data in the actual collections tho)
                         newData['dateTime'] = dateTime;
                         db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                        db.ref('proposed/' + proposalID).update({caseID: caseID});
                         proposalID += 1
                     }
                 }
