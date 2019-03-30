@@ -68,10 +68,10 @@
          }
 
          // Add data to the webpage from a database reference.
-         function addFromRef(dataRef, header) {
+         function addFromRef(dataRef, header, caseID) {
              dataRef.once('value').then(function(snapshot) {
                  // Add the information to the webpage.
-                 appendHTML(header, snapshot.val());
+                 appendHTML(header, snapshot.val(), caseID);
 
                  // Print the data for debugging purposes.
                  console.log('(' + snapshot.key + ',' + header + ') =>', snapshot.val());
@@ -183,11 +183,11 @@
                  console.log('found the caseID:' + caseID);
 
                  // Get all of the information for this case.
-                 addFromRef(db.ref(parent + 'cases/' + caseID), 'Case Overview');
-                 addFromRef(db.ref(parent + 'clients/' + caseID), 'Client');
-                 addFromRef(db.ref(parent + 'loved_ones/' + caseID), 'Loved Ones');
-                 addFromRef(db.ref(parent + 'records/' + caseID), 'Records');
-                 addFromRef(db.ref(parent + 'volunteers/' + caseID), 'Volunteer');
+                 addFromRef(db.ref(parent + 'cases/' + caseID), 'Case Overview', caseID);
+                 addFromRef(db.ref(parent + 'clients/' + caseID), 'Client', caseID);
+                 addFromRef(db.ref(parent + 'loved_ones/' + caseID), 'Loved Ones', caseID);
+                 addFromRef(db.ref(parent + 'records/' + caseID), 'Records', caseID);
+                 addFromRef(db.ref(parent + 'volunteers/' + caseID), 'Volunteer', caseID);
 
                  let notesRef = db.ref(parent + 'notes/').orderByChild('caseID').equalTo(caseID);
                  notesRef.once('value').then(function(snapshot) {
@@ -211,20 +211,55 @@
          }
 
          function viewNext() {
-             proposalID += 1;
+             proposalID++;
 
              clearHTML();
              readNext(proposalID);
          }
 
          function viewPrevious() {
-             proposalID -= 1;
+             proposalID--;
 
              clearHTML();
              readNext(proposalID);
          }
 
          readNext(proposalID)
+
+
+         function deleteFromProposed() {
+             // Delete the current directory of the 'proposed' branch, along
+             // with all child directories.
+             db.ref('proposed/' + proposalID).remove();
+         }
+
+
+         // Approve the proposed change.
+         function approve() {
+             for (let path in originalData) {
+                 // Make sure this is not the date-time field, as we don't want
+                 // to add this to the regular database.
+                 if (path.includes('dateTime')) {
+                     continue;
+                 }
+
+                 // Write the updated data. The 'path' variable holds the path
+                 // from the root of the database to the actual field that needs
+                 // to be updated, so the reference is from the database root.
+                 updatedData = {};
+                 updatedData[path] = originalData[path];
+                 db.ref('/').update(updatedData);
+
+                // Clean up the 'proposed' branch of the database.
+                deleteFromProposed();
+             }
+         }
+
+         // Reject the proposed change.
+         function discard() {
+             // Simply delete the proposed change.
+             deleteFromProposed();
+         }
 
      </script>
 
