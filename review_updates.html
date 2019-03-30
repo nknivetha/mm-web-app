@@ -13,255 +13,111 @@
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 
     <script>
-            var config = {
-                  apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-                  authDomain: "miraclemessages-v2.firebaseapp.com",
-                  databaseURL: "https://miraclemessages-v2.firebaseio.com",
-                  projectId: "miraclemessages-v2",
-                  storageBucket: "miraclemessages-v2.appspot.com",
-                  messagingSenderId: "669586730683"
-                };
-              app = firebase.initializeApp(config);
-     </script>
+        var config = {
+            apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+            authDomain: "miraclemessages-v2.firebaseapp.com",
+            databaseURL: "https://miraclemessages-v2.firebaseio.com",
+            projectId: "miraclemessages-v2",
+            storageBucket: "miraclemessages-v2.appspot.com",
+            messagingSenderId: "669586730683"
+        };
+        app = firebase.initializeApp(config);
+    </script>
 
-     <script>
-         let proposalID = 0;
-         const db = firebase.database();
-         const URLParams = getURLParams();
-         // const caseID = URLParams["caseID"];
-         const isAdmin = (URLParams["isAdmin"] === 'true');
+    <!-- Import headerToColl (dictionary), getURLParams, formatWords,
+         escapeSingleQuotes, appendHTML, addFromRef, getData -->
+    <script src='utils/database.js'></script>
+    <script>
+        let proposalID = 0;
+        const db = firebase.database();
+        const URLParams = getURLParams();
+        const isAdmin = (URLParams["isAdmin"] === 'true');
 
-         // Setup contant dictionaries to map from the database collection names,
-         // such as 'loved_ones', to the header names, such as 'Loved Ones'.
-         const collToHeader = {'cases': 'Case Overview',
-                               'clients': 'Client',
-                               'loved_ones': 'Loved Ones',
-                               'notes': 'Notes',
-                               'records': 'Records',
-                               'volunteers': 'Volunteer'};
-         const headerToColl = reverseDict(collToHeader);
+        // Setup a dictionary for the unedited data so that when data is saved,
+        // only changed data will be saved.
+        let originalData = {};
 
-         // Setup a dictionary for the unedited data so that when data is saved,
-         // only changed data will be saved.
-         let originalData = {};
-
-         // Get case ID parameters from the URL (generated and passed in
-         // by search.html)
-         function getURLParams() {
-             var vars = {};
-             var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-                 vars[key] = value;
-             });
-             return vars;
-         }
-
-         // Create a helper function to reverse a dictionary.
-         function reverseDict(dict) {
-             let rev = {};
-
-             for (let key in dict) {
-                 // Reverse the (key, value) pair.
-                 rev[dict[key]] = key;
-             }
-
-             return rev;
-         }
-
-         // Add data to the webpage from a database reference.
-         function addFromRef(dataRef, header, caseID) {
-             dataRef.once('value').then(function(snapshot) {
-                 // Add the information to the webpage.
-                 appendHTML(header, snapshot.val(), caseID);
-
-                 // Print the data for debugging purposes.
-                 console.log('(' + snapshot.key + ',' + header + ') =>', snapshot.val());
-             });
-         }
-
-         // Create a string that is the same as the input string except single
-         // quotes are replaced with the HTML entity for a single quote.
-         function escapeSingleQuotes(original) {
-             let replaced = '';
-
-             for (let i = 0; i < original.length; i++) {
-                 if (original.charAt(i) == '\'') {
-                     // Add the HTML entity for a single quote.
-                     replaced += "&#39";
-                 }
-                 else {
-                     replaced += original.charAt(i);
-                 }
-             }
-
-             return replaced;
-         }
-
-         // Format the field names in the database so they are better to read.
-         // For instance, 'lastKnownLocation' should be 'Last Known Location'
-         // and 'caseID' should be 'Case ID'.
-         function formatWords(field) {
-             // Add a space before each capital letter unless it was immediately
-             // preceded by a capital letter. This makes sure that 'caseID' does
-             // not become 'Case I D'.
-             let newField = '';
-             let prevCapital = false;
-
-             for (let i = 0; i < field.length; i++) {
-                 const ch = field.charAt(i);
-
-                 // Check if the previous character was not capitalized and the
-                 // current character is a capital letter.
-                 if (/[A-Z]/.test(ch) && !prevCapital) {
-                     newField += ' ';
-                 }
-
-                 newField += ch;
-
-                 // Update prevCapital.
-                 prevCapital = false;
-
-                 if (/[A-Z]/.test(ch)) {
-                     prevCapital = true;
-                 }
-             }
-
-             // Capitalize the first character of newField.
-             newField = newField[0].toUpperCase() + newField.substr(1);
-
-             return newField;
-         }
-
-         // Create a new section in the HTML to display some data.
-         function appendHTML(header, data, id, caseID) {
-             let section = document.getElementById(header);
-             let html = '';
-
-             // The id should be the identifier so clients/id (for example) holds
-             // the given data. The id is used when saving data to check which
-             // data was actually updated.
-             if (id == undefined) {
-                 id = caseID;
-             }
-
-             // Make sure there is actually some data to add.
-             if (data == null) {
-                 console.log('appendHTML is returning early for header', header)
-                 return;
-             }
-
-             // Add the section to the html.
-             html += '<h3>' + header + '</h3>';
-
-             // Add the data to the html.
-             for (let key in data) {
-                 let tagID = id + '/' + key
-                 const label = formatWords(key)
-
-                 // When setting the value of the HTML tag, we wrap the text in
-                 // single quotes so that multiple words can be displayed.
-                 // However, the text could have single quotes, so we have to
-                 // convert them to the appropriate HTML entity.
-                 const value = escapeSingleQuotes(data[key]);
-                 html += label + ": <input id='" + tagID + "' value='" + value + "' readonly></input><br>";
-
-                 // Add this data to the originalData dictionary.
-                 let path = headerToColl[header] + '/' + id + '/' + key;
-                 originalData[path] = data[key];
-             }
-
-             section.innerHTML += html;
-         }
 
         function readNext(proposalID) {
-             const parent = 'proposed/' + proposalID + '/'
+            const parentDir = 'proposed/' + proposalID;
 
-             // Find the case ID.
-             let caseID = null;
-             db.ref(parent + 'caseID').once('value').then(function (snapshot) {
-                 caseID = snapshot.val();
+            // Find the case ID.
+            let caseID = null;
+            db.ref(parentDir + '/caseID').once('value').then(function (snapshot) {
+                caseID = snapshot.val();
+                console.log('found the caseID:' + caseID);
 
-                 console.log('found the caseID:' + caseID);
+                if (caseID != null) {
+                    // Get the data from the proposed branch.
+                    getData(caseID, parentDir, firstNoteOnly=true);
+                }
+            });
+        }
 
-                 // Get all of the information for this case.
-                 addFromRef(db.ref(parent + 'cases/' + caseID), 'Case Overview', caseID);
-                 addFromRef(db.ref(parent + 'clients/' + caseID), 'Client', caseID);
-                 addFromRef(db.ref(parent + 'loved_ones/' + caseID), 'Loved Ones', caseID);
-                 addFromRef(db.ref(parent + 'records/' + caseID), 'Records', caseID);
-                 addFromRef(db.ref(parent + 'volunteers/' + caseID), 'Volunteer', caseID);
+        // Remove all of the case data from the screen.
+        function clearHTML() {
+            divNames = document.getElementsByTagName('div');
 
-                 let notesRef = db.ref(parent + 'notes/').orderByChild('caseID').equalTo(caseID);
-                 notesRef.once('value').then(function(snapshot) {
-                  data = snapshot.val();
+            for (let key in divNames) {
+                divNames[key].innerHTML = '';
+            }
+        }
 
-                  for (let key in data) {
-                      console.log('finding notes. key:', key);
-                      appendHTML('Notes', data[key], key, caseID);
-                  }
-                  console.log(snapshot.key, '=>', snapshot.val());
-                 });
-             });
-         }
+        function viewNext() {
+            proposalID++;
 
-         function clearHTML() {
-             divNames = document.getElementsByTagName('div');
+            clearHTML();
+            readNext(proposalID);
+        }
 
-             for (let key in divNames) {
-                 divNames[key].innerHTML = '';
-             }
-         }
+        function viewPrevious() {
+            proposalID--;
 
-         function viewNext() {
-             proposalID++;
+            clearHTML();
+            readNext(proposalID);
+        }
 
-             clearHTML();
-             readNext(proposalID);
-         }
-
-         function viewPrevious() {
-             proposalID--;
-
-             clearHTML();
-             readNext(proposalID);
-         }
-
-         readNext(proposalID)
+        function deleteFromProposed() {
+            // Delete the current directory of the 'proposed' branch, along
+            // with all child directories.
+            db.ref('proposed/' + proposalID).remove();
+        }
 
 
-         function deleteFromProposed() {
-             // Delete the current directory of the 'proposed' branch, along
-             // with all child directories.
-             db.ref('proposed/' + proposalID).remove();
-         }
+        // Approve the proposed change.
+        function approve() {
+            console.log('originalData:')
 
+            for (let path in originalData) {
+                console.log('(key, value): (' + path + ', ' + originalData[path] + ')');
 
-         // Approve the proposed change.
-         function approve() {
-             for (let path in originalData) {
-                 // Make sure this is not the date-time field, as we don't want
-                 // to add this to the regular database.
-                 if (path.includes('dateTime')) {
-                     continue;
-                 }
+                // Make sure this is not the date-time field, as we don't want
+                // to add this to the regular database.
+                if (path.includes('dateTime')) {
+                    continue;
+                }
 
-                 // Write the updated data. The 'path' variable holds the path
-                 // from the root of the database to the actual field that needs
-                 // to be updated, so the reference is from the database root.
-                 updatedData = {};
-                 updatedData[path] = originalData[path];
-                 db.ref('/').update(updatedData);
+                // Write the updated data. The 'path' variable holds the path
+                // from the root of the database to the actual field that needs
+                // to be updated, so the reference is from the database root.
+                updatedData = {};
+                updatedData[path] = originalData[path];
+                db.ref('/').update(updatedData);
 
                 // Clean up the 'proposed' branch of the database.
                 deleteFromProposed();
-             }
-         }
+            }
+        }
 
-         // Reject the proposed change.
-         function discard() {
-             // Simply delete the proposed change.
-             deleteFromProposed();
-         }
+        // Reject the proposed change.
+        function discard() {
+            // Simply delete the proposed change.
+            deleteFromProposed();
+        }
 
-     </script>
+        readNext(proposalID);
+
+    </script>
 
 
     <div id='Case Overview'></div>
