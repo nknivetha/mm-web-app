@@ -30,12 +30,24 @@
     <script>
         let proposalID = null;
         const db = firebase.database();
-        const URLParams = getURLParams();
-        const isAdmin = (URLParams["isAdmin"] === 'true');
+        const auth = app.auth();
 
         // Setup a dictionary for the unedited data so that when data is saved,
         // only changed data will be saved.
         let originalData = {};
+
+        // Make sure that the user is an admin, and redirect to the home page
+        // if not.
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                // Admin is signed in.
+                isAdmin = true;
+                console.log(user);
+            } else {
+                alert("not logged in");
+                window.location.href = 'index.html';
+            }
+        });
 
 
         function readNext() {

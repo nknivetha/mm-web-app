@@ -55,6 +55,10 @@ function visitAdd(){
 function visitMetrics(){
   window.location='metrics.html';
 }
+function visitReviewUpdates(){
+  window.location='review_updates.html';
+}
+
 // function visitAdmin(){
 //   window.location='/metrics.html';
 // }
@@ -83,7 +87,7 @@ function visitMetrics(){
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
 
     }
-    
+
   function showDiv() {
    document.getElementById('login').style.visibility = "visible";
   }
@@ -93,7 +97,8 @@ function visitMetrics(){
     <button type="button" id="edit" onclick="visitEdit()">Edit</button>
     <button type="button" id="add" onclick="visitAdd()">Add</button>
     <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
-    <button type="button" id="metrics" onclick="showDiv()">Admin</button>
+    <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
+    <button type="button" id="admin" onclick="showDiv()">Admin</button>
 
 
     <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
