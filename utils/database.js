@@ -71,7 +71,7 @@ function escapeSingleQuotes(original) {
 }
 
 // Create a new section in the HTML to display some data.
-function appendHTML(header, data, id) {
+function appendHTML(header, data, id, originalData) {
     let section = document.getElementById(header);
     let html = '';
 
@@ -106,10 +106,10 @@ function appendHTML(header, data, id) {
 }
 
 // Add data to the webpage from a database reference.
-function addFromRef(dataRef, header, id) {
+function addFromRef(dataRef, header, id, originalData) {
     dataRef.once('value').then(function(snapshot) {
         // Add the information to the webpage.
-        appendHTML(header, snapshot.val(), id);
+        appendHTML(header, snapshot.val(), id, originalData);
 
         // Print the data for debugging purposes.
         console.log('(' + snapshot.key + ',' + header + ') =>', snapshot.val());
@@ -117,13 +117,13 @@ function addFromRef(dataRef, header, id) {
 }
 
 // Read some documents from the database.
-function getData(caseID, parentDir='', firstNoteOnly=false) {
+function getData(caseID, originalData, parentDir='', firstNoteOnly=false) {
     // Get all of the information for this case.
-    addFromRef(db.ref(parentDir + '/cases/' + caseID), 'Case Overview', caseID);
-    addFromRef(db.ref(parentDir + '/clients/' + caseID), 'Client', caseID);
-    addFromRef(db.ref(parentDir + '/loved_ones/' + caseID), 'Loved Ones', caseID);
-    addFromRef(db.ref(parentDir + '/records/' + caseID), 'Records', caseID);
-    addFromRef(db.ref(parentDir + '/volunteers/' + caseID), 'Volunteer', caseID);
+    addFromRef(db.ref(parentDir + '/cases/' + caseID), 'Case Overview', caseID, originalData);
+    addFromRef(db.ref(parentDir + '/clients/' + caseID), 'Client', caseID, originalData);
+    addFromRef(db.ref(parentDir + '/loved_ones/' + caseID), 'Loved Ones', caseID, originalData);
+    addFromRef(db.ref(parentDir + '/records/' + caseID), 'Records', caseID, originalData);
+    addFromRef(db.ref(parentDir + '/volunteers/' + caseID), 'Volunteer', caseID, originalData);
 
     // Setup the query to the notes.
     let notesQuery = null;
@@ -142,7 +142,7 @@ function getData(caseID, parentDir='', firstNoteOnly=false) {
 
         for (let key in data) {
             console.log('finding notes. key:', key);
-            appendHTML('Notes', data[key], key);
+            appendHTML('Notes', data[key], key, originalData);
         }
         console.log(snapshot.key, '=>', snapshot.val());
     });

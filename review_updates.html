@@ -28,7 +28,7 @@
          escapeSingleQuotes, appendHTML, addFromRef, getData -->
     <script src='utils/database.js'></script>
     <script>
-        let proposalID = 0;
+        let proposalID = null;
         const db = firebase.database();
         const URLParams = getURLParams();
         const isAdmin = (URLParams["isAdmin"] === 'true');
@@ -38,7 +38,7 @@
         let originalData = {};
 
 
-        function readNext(proposalID) {
+        function readNext() {
             const parentDir = 'proposed/' + proposalID;
 
             // Find the case ID.
@@ -47,9 +47,27 @@
                 caseID = snapshot.val();
                 console.log('found the caseID:' + caseID);
 
-                if (caseID != null) {
+                if (caseID == null) {
+                    // The queue is emtpy, so reset id and smallest_id.
+                    db.ref('proposed').update({id: 0, smallest_id: 0});
+
+                    // Display a message so the user knows the queue is empyt.
+                    const section = document.getElementById('Empty Queue');
+                    let html = '<h4>There are no more updates to be reviewed.</h4>';
+                    section.innerHTML = html;
+
+                    // Remove the case name and buttons.
+                    document.getElementById('Case Name').style.display = 'none';
+                    document.getElementById('accept').style.display = 'none';
+                    document.getElementById('reject').style.display = 'none';
+                }
+                else {
+                    // Show the case ID.
+                    const html = '<h4>Case ID: ' + caseID + '</h4>';
+                    document.getElementById('Case Name').innerHTML = html;
+
                     // Get the data from the proposed branch.
-                    getData(caseID, parentDir, firstNoteOnly=true);
+                    getData(caseID, originalData, parentDir, firstNoteOnly=true);
                 }
             });
         }
@@ -66,23 +84,21 @@
         function viewNext() {
             proposalID++;
 
-            clearHTML();
-            readNext(proposalID);
-        }
-
-        function viewPrevious() {
-            proposalID--;
+            // Make sure the 'originalData' is clean.
+            originalData = {};
 
             clearHTML();
-            readNext(proposalID);
+            readNext();
         }
 
-        function deleteFromProposed() {
+        function deleteFromProposed(propID) {
             // Delete the current directory of the 'proposed' branch, along
             // with all child directories.
-            db.ref('proposed/' + proposalID).remove();
-        }
+            db.ref('proposed/' + propID).remove();
 
+            // Update the smallest id.
+            db.ref('proposed').update({smallest_id: propID + 1});
+        }
 
         // Approve the proposed change.
         function approve() {
@@ -103,22 +119,37 @@
                 updatedData = {};
                 updatedData[path] = originalData[path];
                 db.ref('/').update(updatedData);
-
-                // Clean up the 'proposed' branch of the database.
-                deleteFromProposed();
             }
+
+            // Clean up the 'proposed' branch and check the next update.
+            deleteFromProposed(proposalID);
+            viewNext();
         }
 
         // Reject the proposed change.
         function discard() {
-            // Simply delete the proposed change.
-            deleteFromProposed();
+            // Delete the proposed change and go to the next.
+            deleteFromProposed(proposalID);
+            viewNext();
         }
 
-        readNext(proposalID);
+        // Read the first item in the queue.
+        db.ref('proposed/smallest_id').once('value').then(function(snapshot) {
+            // Get the next proposal ID. The '+ 1 - 1' is to convert null
+            // to 0 becuase if the 'proposed' collection is not in the
+            // database, then 'proposed/smallest_id' will be null.
+            proposalID = snapshot.val() + 1 - 1;
+
+            // Update the proposal ID.
+            // const newID = (proposalID + Object.keys(alteredData).length) % 4000000000;
+            // db.ref('proposed').update({id: newID});
+
+            readNext();
+        });
 
     </script>
 
+    <div id='Case Name'></div>
 
     <div id='Case Overview'></div>
     <div id='Client'></div>
@@ -126,10 +157,9 @@
     <div id='Notes'></div>
     <div id='Records'></div>
     <div id='Volunteer'></div>
+    <div id='Empty Queue'></div>
 
-    <button type="button" id="prev" onclick=viewPrevious()>Previous</button>
     <button type="button" id="accept" onclick=approve()>Accept</button>
     <button type="button" id="reject" onclick=discard()>Reject</button>
-    <button type="button" id="next" onclick=viewNext()>Next</button>
 </body>
 </html>
