@@ -102,10 +102,6 @@
                 // database, then 'proposed/id' will be null.
                 proposalID = snapshot.val() + 1 - 1;
 
-                // Update the proposal ID.
-                const newID = (proposalID + Object.keys(alteredData).length) % 4000000000;
-                db.ref('proposed').update({id: newID});
-
                 // Update the fields.
                 for (let key in alteredData) {
                     // The key is in the form 'cases/id/field', so we have to
@@ -117,7 +113,9 @@
                     let newData = {};
                     newData[field] = alteredData[key];
 
-                    if (isAdmin) {
+                    // If a nonadmin updates case status info, add it to the
+                    // 'proposed' queue for an admin to approve it.
+                    if (isAdmin || !path.startsWith('cases')) {
                         // Write the data directly to the database.
                         // and store a copy in the audit log (with the
                         // current dateTime stored as well)
@@ -132,7 +130,10 @@
                         newData['dateTime'] = dateTime;
                         db.ref('proposed/' + proposalID + '/' + path).set(newData);
                         db.ref('proposed/' + proposalID).update({caseID: caseID});
+
+                        // Update the proposal ID.
                         proposalID += 1
+                        db.ref('proposed').update({id: proposalID});
                     }
                 }
 
