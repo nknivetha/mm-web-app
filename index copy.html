@@ -55,10 +55,6 @@ function visitAdd(){
 function visitMetrics(){
   window.location='metrics.html';
 }
-function visitReviewUpdates(){
-  window.location='review_updates.html';
-}
-
 // function visitAdmin(){
 //   window.location='/metrics.html';
 // }
@@ -117,7 +113,6 @@ function visitReviewUpdates(){
         console.log(error.code);
         var errorCode = error.code;
         var errorMessage = error.message;
-        success.innerHTML = error.message;
     });
   }
 
@@ -131,8 +126,10 @@ function visitReviewUpdates(){
     <button type="button" id="edit" onclick="visitEdit()">Edit</button>
     <button type="button" id="add" onclick="visitAdd()">Add</button>
     <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
-    <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
-    <button type="button" id="admin" onclick="showDiv()">Admin</button>
+    <button type="button" id="metrics" onclick="showDiv()">Login</button>
+    <button type="button" id="metrics" onclick="showDivCreate()">Create New User</button>
+
+
 
 
     <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
@@ -149,7 +146,6 @@ this.form['query'].style.visibility='visible'};" -->
   E-mail: <input type="text" id="mynamec"><br/>
   Password: <input type="text" id="mypassc">
   <input type="button" value="Create User" onclick="createUser()">
-  <div id ="success"></div>
 </div>
 </body>
 </html>

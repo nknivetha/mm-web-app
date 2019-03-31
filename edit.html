@@ -13,61 +13,31 @@
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 
     <script>
-            var config = {
-                  apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-                  authDomain: "miraclemessages-v2.firebaseapp.com",
-                  databaseURL: "https://miraclemessages-v2.firebaseio.com",
-                  projectId: "miraclemessages-v2",
-                  storageBucket: "miraclemessages-v2.appspot.com",
-                  messagingSenderId: "669586730683"
-                };
-              app = firebase.initializeApp(config);
-     </script>
+        var config = {
+            apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+            authDomain: "miraclemessages-v2.firebaseapp.com",
+            databaseURL: "https://miraclemessages-v2.firebaseio.com",
+            projectId: "miraclemessages-v2",
+            storageBucket: "miraclemessages-v2.appspot.com",
+            messagingSenderId: "669586730683"
+        };
+        app = firebase.initializeApp(config);
+    </script>
+
+    <!-- Import headerToColl (dictionary), getURLParams, formatWords,
+         escapeSingleQuotes, appendHTML, addFromRef, getData -->
+    <script src='utils/database.js'></script>
 
     <script>
         // Initialize Firebase
-
-
         const db = firebase.database();
         const URLParams = getURLParams();
         const caseID = URLParams["caseID"];
         const isAdmin = (URLParams["isAdmin"] === 'true');
 
-        // Setup contant dictionaries to map from the database collection names,
-        // such as 'loved_ones', to the header names, such as 'Loved Ones'.
-        const collToHeader = {'cases': 'Case Overview',
-                              'clients': 'Client',
-                              'loved_ones': 'Loved Ones',
-                              'notes': 'Notes',
-                              'records': 'Records',
-                              'volunteers': 'Volunteer'};
-        const headerToColl = reverseDict(collToHeader);
-
         // Setup a dictionary for the unedited data so that when data is saved,
         // only changed data will be saved.
         let originalData = {};
-
-        // Get case ID parameters from the URL (generated and passed in
-        // by search.html)
-        function getURLParams() {
-            var vars = {};
-            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-                vars[key] = value;
-            });
-            return vars;
-        }
-
-        // Create a helper function to reverse a dictionary.
-        function reverseDict(dict) {
-            let rev = {};
-
-            for (let key in dict) {
-                // Reverse the (key, value) pair.
-                rev[dict[key]] = key;
-            }
-
-            return rev;
-        }
 
         // Allow each input field to be edited.
         function enableEdit() {
@@ -124,17 +94,13 @@
             var month = today.getMonth() + 1;
             var year = today.getFullYear();
 
-            var dateTime = str(hr) + ':' + str(min) + ':' + str(sec) + '::' + str(month) + '/' + str(day) + '/' + str(year);
+            var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
 
             db.ref('proposed/id').once('value').then(function(snapshot) {
                 // Get the next proposal ID. The '+ 1 - 1' is to convert null
                 // to 0 becuase if the 'proposed' collection is not in the
                 // database, then 'proposed/id' will be null.
                 proposalID = snapshot.val() + 1 - 1;
-
-                // Update the proposal ID.
-                const newID = (proposalID + Object.keys(alteredData).length) % 4000000000;
-                db.ref('proposed').update({id: newID});
 
                 // Update the fields.
                 for (let key in alteredData) {
@@ -147,7 +113,9 @@
                     let newData = {};
                     newData[field] = alteredData[key];
 
-                    if (isAdmin) {
+                    // If a nonadmin updates case status info, add it to the
+                    // 'proposed' queue for an admin to approve it.
+                    if (isAdmin || !path.startsWith('cases')) {
                         // Write the data directly to the database.
                         // and store a copy in the audit log (with the
                         // current dateTime stored as well)
@@ -158,10 +126,14 @@
                     else {
                         // Enqueue the proposed edit to be approved by admin.
                         // Include the dateTime (should be removed when
-                        // storing the data in the actual collections tho)
+                        // storing the data in the actual collections tho).
                         newData['dateTime'] = dateTime;
                         db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                        db.ref('proposed/' + proposalID).update({caseID: caseID});
+
+                        // Update the proposal ID.
                         proposalID += 1
+                        db.ref('proposed').update({id: proposalID});
                     }
                 }
 
@@ -185,134 +157,8 @@
             writeData(fields);
         }
 
-        // Format the field names in the database so they are better to read.
-        // For instance, 'lastKnownLocation' should be 'Last Known Location'
-        // and 'caseID' should be 'Case ID'.
-        function formatWords(field) {
-            // Add a space before each capital letter unless it was immediately
-            // preceded by a capital letter. This makes sure that 'caseID' does
-            // not become 'Case I D'.
-            let newField = '';
-            let prevCapital = false;
-
-            for (let i = 0; i < field.length; i++) {
-                const ch = field.charAt(i);
-
-                // Check if the previous character was not capitalized and the
-                // current character is a capital letter.
-                if (/[A-Z]/.test(ch) && !prevCapital) {
-                    newField += ' ';
-                }
-
-                newField += ch;
-
-                // Update prevCapital.
-                prevCapital = false;
-
-                if (/[A-Z]/.test(ch)) {
-                    prevCapital = true;
-                }
-            }
-
-            // Capitalize the first character of newField.
-            newField = newField[0].toUpperCase() + newField.substr(1);
-
-            return newField;
-        }
-
-        // Create a string that is the same as the input string except single
-        // quotes are replaced with the HTML entity for a single quote.
-        function escapeSingleQuotes(original) {
-            let replaced = '';
-
-            for (let i = 0; i < original.length; i++) {
-                if (original.charAt(i) == '\'') {
-                    // Add the HTML entity for a single quote.
-                    replaced += "&#39";
-                }
-                else {
-                    replaced += original.charAt(i);
-                }
-            }
-
-            return replaced;
-        }
-
-        // Create a new section in the HTML to display some data.
-        function appendHTML(header, data, id) {
-            let section = document.getElementById(header);
-            let html = '';
-
-            // The id should be the identifier so clients/id (for example) holds
-            // the given data. The id is used when saving data to check which
-            // data was actually updated.
-            if (id == undefined) {
-                id = caseID;
-            }
-
-            // Make sure there is actually some data to add.
-            if (data == null) {
-                console.log('appendHTML is returning early for header', header)
-                return;
-            }
-
-            // Add the section to the html.
-            html += '<h3>' + header + '</h3>';
-
-            // Add the data to the html.
-            for (let key in data) {
-                let tagID = id + '/' + key
-                const label = formatWords(key)
-
-                // When setting the value of the HTML tag, we wrap the text in
-                // single quotes so that multiple words can be displayed.
-                // However, the text could have single quotes, so we have to
-                // convert them to the appropriate HTML entity.
-                const value = escapeSingleQuotes(data[key]);
-                html += label + ": <input id='" + tagID + "' value='" + value + "' readonly></input><br>";
-
-                // Add this data to the originalData dictionary.
-                let path = headerToColl[header] + '/' + id + '/' + key;
-                originalData[path] = data[key];
-            }
-
-            section.innerHTML += html;
-        }
-
-        // Add data to the webpage from a database reference.
-        function addFromRef(dataRef, header) {
-            dataRef.once('value').then(function(snapshot) {
-                // Add the information to the webpage.
-                appendHTML(header, snapshot.val());
-
-                // Print the data for debugging purposes.
-                console.log('(' + snapshot.key + ',' + header + ') =>', snapshot.val());
-            });
-        }
-
-        // Read some documents from the database.
-        function getData() {
-            // Get all of the information for this case.
-            addFromRef(db.ref('cases/' + caseID), 'Case Overview');
-            addFromRef(db.ref('clients/' + caseID), 'Client');
-            addFromRef(db.ref('loved_ones/' + caseID), 'Loved Ones');
-            addFromRef(db.ref('records/' + caseID), 'Records');
-            addFromRef(db.ref('volunteers/' + caseID), 'Volunteer');
-
-            let notesRef = db.ref('notes/').orderByChild('caseID').equalTo(caseID);
-            notesRef.once('value').then(function(snapshot) {
-                data = snapshot.val();
-
-                for (let key in data) {
-                    console.log('finding notes. key:', key);
-                    appendHTML('Notes', data[key], key);
-                }
-                console.log(snapshot.key, '=>', snapshot.val());
-            });
-        }
-
         // Load a case.
-        getData();
+        getData(caseID, originalData);
     </script>
 
     <div id='Case Overview'></div>
