@@ -55,8 +55,7 @@
         var pword = document.getElementById("mypass").value;
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(
-          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);}
-                                                                          );
+          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);});
     }
   </script>
 

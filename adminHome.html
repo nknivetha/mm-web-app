@@ -82,23 +82,10 @@ function visitCreateUser(){
 
     var auth = firebase.auth(app);
 
-
-
     function signout()
     {
-      const user = data.user;
-      console.log(user);
-
-      if (user) {
-        auth.signOut().then(function() {
-          alert("Sign-out successful.");
-        }).catch(function(error) {
-          // An error happened.
-        });
-      }
-      else {
-        alert("Could not sign out");
-      }
+      //auth.signOut().catch(signoutCatch).then(signoutGood);
+      window.location.href = "index.html";
   }
 
 

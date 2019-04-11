@@ -71,23 +71,26 @@ function visitAdd(){
 
     var auth = firebase.auth(app);
 
+    function signoutGood() {
+      const user = data.user;
+      if (user == null) {
+        alert ("Successfully signed out");
+        window.location.href = "index.html";
+      }
+    }
+
+    function signoutCatch(error)
+    {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        alert(error.message);
+    }
 
 
     function signout()
     {
-      const user = data.user;
-      console.log(user);
-
-      if (user) {
-        auth.signOut().then(function() {
-          alert("Sign-out successful.");
-        }).catch(function(error) {
-          // An error happened.
-        });
-      }
-      else {
-        alert("Could not sign out");
-      }
+      //auth.signOut().catch(signoutCatch).then(signoutGood);
+      window.location.href = "index.html";
   }
 
 
