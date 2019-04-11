@@ -63,7 +63,9 @@ searchRef.orderByKey().on("value",searchFilter);
 function searchFilter(snapshot)
 {
 
-    var contents = [];
+    var assigned = [];
+    var unassigned = []
+    var isUnassigned = []
     allData = snapshot.val();
 
     for (k in allData)
@@ -75,18 +77,28 @@ function searchFilter(snapshot)
           checking = String(oneCase.volunteerContactInfo).toLowerCase();
         }
 
-        if (checking.includes(query.toLowerCase())){
-          contents.push(String(oneCase.caseID));
+        if (checking.includes(query.toLowerCase())) {
+          assigned.push(String(oneCase.caseID));
         }
+        if (checking === "") {
+          isUnassigned.push("(unassigned case)");
+          unassigned.push(String(oneCase.caseID));
+        }
+          
     }
 
     var dump = document.getElementById("results");
 
-    var fixedCase = contents[0].replace(/\d+$/, "")
-    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-    for (var i = 1; i < contents.length; i++) {
-      fixedCase = contents[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+    var fixedCase = assigned[0].replace(/\d+$/, "")
+    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + assigned[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+    for (var i = 1; i < assigned.length; i++) {
+      fixedCase = assigned[i].replace(/\d+$/, "")
+      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+    }
+
+    for (var i = 0; i < unassigned.length; i++) {
+      fixedCase = unassigned[i].replace(/\d+$/, "")
+      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' ' + isUnassigned[i] + '</a> </th> </tr>';
     }
 }
 
@@ -99,8 +111,8 @@ function searchFilter(snapshot)
 <br>
 
 Results:<br/>
-<div style="height:400px; width:500px; overflow:auto; border:1px solid black">
-  <table id="results" style="width:40%">
+<div style="height:400px; width:800px; overflow:auto; border:1px solid black">
+  <table id="results" style="width:70%">
   </table>
 </div>
   <!-- /* Link to view/edit/full log*/ -->
