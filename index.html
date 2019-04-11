@@ -25,60 +25,20 @@
 
 <script lang="text/javascript">
 
-function showAllData()
-{
-  alert("here");
-  var rootRef = db.ref();
-  var contents = "";
-  rootRef.on('value', function(snap){contents += snap.val();});
-  alert(contents);
-
-  var dump = document.getElementById("allData");
-  dump.innerHTML = contents;
-}
-
-function startInsert()
-{
-  var ua = document.getElementById("userArea");
-  ua.src = "insert.html";
-}
-
-function visitSearch(){
-  window.location='search.html';
-}
-function visitEdit(){
-  window.location='edit.html';
-}
-function visitAdd(){
-  window.location='https://miraclemessages.org/refer';
-}
-function visitReviewUpdates(){
-  window.location='review_updates.html';
-}
-function visitCreateUser(){
-  window.location='create_user.html';
-}
-
-// function visitAdmin(){
-//   window.location='/metrics.html';
-// }
-
-
-    var auth = firebase.auth(app);
+  var auth = app.auth();
+  var isAdmin = false;
 
     function signin_good(data)
     {
         const user = data.user;
-      console.log(user);
 
         // this function might get hit twice, first with user null
         // if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
         if (user != null && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2')
         // jess's UID
-            window.location.href = "index.html";
+            window.location.href = "adminHome.html";
         else {
-            alert(user.email);
-            window.location.href = "volunteerCases.html";
+            window.location.href = "volunteerHome.html";
         }
     }
 
@@ -95,53 +55,11 @@ function visitCreateUser(){
         var pword = document.getElementById("mypass").value;
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(
-          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);}
-                                                                          );
+          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);});
     }
+  </script>
 
-    function signout()
-    {
-      const user = data.user;
-      console.log(user);
-      alert("yo");
-
-      if (user) {
-        auth.signOut().then(function() {
-          alert("Sign-out successful.");
-        }).catch(function(error) {
-          // An error happened.
-        });
-      }
-      else {
-        alert("issue");
-      }
-  }
-
-  function showDivLogin() {
-   document.getElementById('login').style.visibility = "visible";
-  }
-
-
-
-  function addCase(){
-    // go to cases corresponding to UID
-
-  }
-</script>
-
-    <button type="button" id="search" onclick="visitSearch()">Search</button>
-    <button type="button" id="edit" onclick="visitEdit()">Edit</button>
-    <button type="button" id="add" onclick="visitAdd()">Add</button>
-    <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
-    <button type="button" id="admin" onclick="showDivLogin()">Sign In</button>
-    <button type="button" id="create user" onclick="visitCreateUser()">Create New User</button>
-    <button type="button" id="sign out" onclick="signout()">Sign Out</button>
-
-
-    <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
-this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';
-this.form['query'].style.visibility='visible'};" -->
-    <div id="login" style="visibility:hidden;">
+  <div id="login">
 
     E-mail: <input type="text" id="myname"><br/>
     Password: <input type="text" id="mypass">
