@@ -18,29 +18,36 @@
 </script>
 
 </head>
-<body>
 
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
 
 <script lang="text/javascript">
+
+
 var db = firebase.database(app);
 var checkFrom = ""; // field to check from
 var query; // user input of what to check for
-const isAdmin = false;
+var auth = app.auth();
+var isAdmin = false;
 
+// Check if user is signed in - only allow access to the page if they are
+// If not logged into the admin account, redirect to the volunteer
+// search page.
 auth.onAuthStateChanged(function(user) {
   if (user) {
-    query = user.uid;
+    query = user.email;
     console.log(user);
     // User is signed in.
   } else {
-    alert("not logged in");
-    window.location.href = 'index.html';
+    alert("not logged in as admin");
+    window.location.href = 'volunteerSearch.html';
   }
 });
 
+function getCases()
+{
 contents = "";
 var dump = document.getElementById("results");
 
@@ -50,6 +57,7 @@ checkFrom = 'volunteerID';
 var searchRef = db.ref(searchFrom);
 
 searchRef.orderByKey().on("value",searchFilter);
+}
 
 // Goes through the field, and adds it to the list if it matches the criteria
 function searchFilter(snapshot)
@@ -64,7 +72,7 @@ function searchFilter(snapshot)
         var checking;
 
         if (checkFrom === 'volunteerID') {
-          checking = String(oneCase.volunteerName).toLowerCase();
+          checking = String(oneCase.volunteerContactInfo).toLowerCase();
         }
 
         if (checking.includes(query.toLowerCase())){
@@ -84,6 +92,7 @@ function searchFilter(snapshot)
 
 
 </script>
+<body onload="getCases();">
 
 <center>
 

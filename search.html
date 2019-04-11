@@ -37,12 +37,12 @@ var isAdmin = false;
 // If not logged into the admin account, redirect to the volunteer
 // search page.
 auth.onAuthStateChanged(function(user) {
-  if (user) {
+  if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
     isAdmin = true;
     console.log(user);
     // User is signed in.
   } else {
-    alert("not logged in");
+    alert("not logged in as admin");
     window.location.href = 'volunteerSearch.html';
   }
 });
