@@ -39,12 +39,12 @@
         // Make sure that the user is an admin, and redirect to the home page
         // if not.
         auth.onAuthStateChanged(function(user) {
-            if (user) {
+            if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
                 // Admin is signed in.
                 isAdmin = true;
                 console.log(user);
             } else {
-                alert("not logged in");
+                alert("not logged in as admin");
                 window.location.href = 'index.html';
             }
         });

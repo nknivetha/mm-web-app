@@ -58,6 +58,9 @@ function visitMetrics(){
 function visitReviewUpdates(){
   window.location='review_updates.html';
 }
+function visitCreateUser(){
+  window.location='create_user.html';
+}
 
 // function visitAdmin(){
 //   window.location='/metrics.html';
@@ -77,6 +80,7 @@ function visitReviewUpdates(){
         // jess's UID
             window.location.href = "search.html";
         else {
+            alert(user.email);
             window.location.href = "volunteerCases.html";
         }
     }
@@ -93,35 +97,34 @@ function visitReviewUpdates(){
         var email = document.getElementById("myname").value;
         var pword = document.getElementById("mypass").value;
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
-        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(
           function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);}
                                                                           );
     }
 
-  function showDiv() {
+    function signout()
+    {
+      const user = data.user;
+      console.log(user);
+      alert("yo");
+
+      if (user) {
+        auth.signOut().then(function() {
+          alert("Sign-out successful.");
+        }).catch(function(error) {
+          // An error happened.
+        });
+      }
+      else {
+        alert("issue");
+      }
+  }
+
+  function showDivAdmin() {
    document.getElementById('login').style.visibility = "visible";
   }
 
-  function showDivCreate() {
-   document.getElementById('create').style.visibility = "visible";
-  }
 
-
-  function createUser(){
-    var email = document.getElementById("mynamec").value;
-    var pword = document.getElementById("mypassc").value;
-    auth.createUserWithEmailAndPassword(email, pword).then(function(user) {
-
-    var user = firebase.auth().currentUser;
-    console.log(user);
-    addCase() // go to html page
-    }, function(error) {
-        console.log(error.code);
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        success.innerHTML = error.message;
-    });
-  }
 
   function addCase(){
     // go to cases corresponding to UID
@@ -134,7 +137,9 @@ function visitReviewUpdates(){
     <button type="button" id="add" onclick="visitAdd()">Add</button>
     <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
     <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
-    <button type="button" id="admin" onclick="showDiv()">Admin</button>
+    <button type="button" id="admin" onclick="showDivAdmin()">Admin</button>
+    <button type="button" id="create user" onclick="visitCreateUser()">Create New User</button>
+    <button type="button" id="sign out" onclick="signout()">Sign Out</button>
 
 
     <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
@@ -146,12 +151,6 @@ this.form['query'].style.visibility='visible'};" -->
     Password: <input type="text" id="mypass">
     <input type="button" value="Sign in" onclick="signin()">
   </div>
-  <div id="create" style="visibility:hidden;">
 
-  E-mail: <input type="text" id="mynamec"><br/>
-  Password: <input type="text" id="mypassc">
-  <input type="button" value="Create User" onclick="createUser()">
-  <div id ="success"></div>
-</div>
 </body>
 </html>
