@@ -1,0 +1,125 @@
+<html>
+<head>
+<title>Web App</title>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+    authDomain: "miraclemessages-v2.firebaseapp.com",
+    databaseURL: "https://miraclemessages-v2.firebaseio.com",
+    projectId: "miraclemessages-v2",
+    storageBucket: "miraclemessages-v2.appspot.com",
+    messagingSenderId: "669586730683"
+  };
+  var app = firebase.initializeApp(config);
+</script>
+
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+
+<script lang="text/javascript">
+
+var auth = app.auth();
+var isAdmin = false;
+
+// Check if user is signed in - only allow access to the page if they are
+// If not logged into the admin account, redirect to the volunteer
+// search page.
+auth.onAuthStateChanged(function(user) {
+  if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
+    isAdmin = true;
+    console.log(user);
+    // User is signed in.
+  } else {
+    alert("not logged in as admin");
+    window.location.href = 'index.html';
+  }
+});
+
+function showAllData()
+{
+  alert("here");
+  var rootRef = db.ref();
+  var contents = "";
+  rootRef.on('value', function(snap){contents += snap.val();});
+
+  var dump = document.getElementById("allData");
+  dump.innerHTML = contents;
+}
+
+function startInsert()
+{
+  var ua = document.getElementById("userArea");
+  ua.src = "insert.html";
+}
+
+function visitSearch(){
+  window.location='search.html';
+}
+function visitEdit(){
+  window.location='edit.html';
+}
+function visitAdd(){
+  window.location='https://miraclemessages.org/refer';
+}
+function visitReviewUpdates(){
+  window.location='review_updates.html';
+}
+function visitCreateUser(){
+  window.location='create_user.html';
+}
+
+// function visitAdmin(){
+//   window.location='/metrics.html';
+// }
+
+
+    var auth = firebase.auth(app);
+
+
+
+    function signout()
+    {
+      const user = data.user;
+      console.log(user);
+
+      if (user) {
+        auth.signOut().then(function() {
+          alert("Sign-out successful.");
+        }).catch(function(error) {
+          // An error happened.
+        });
+      }
+      else {
+        alert("Could not sign out");
+      }
+  }
+
+
+
+
+  function addCase(){
+    // go to cases corresponding to UID
+
+  }
+</script>
+
+    <button type="button" id="search" onclick="visitSearch()">Search</button>
+    <button type="button" id="add" onclick="visitAdd()">Add</button>
+    <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
+    <button type="button" id="create user" onclick="visitCreateUser()">Create New User</button>
+    <button type="button" id="sign out" onclick="signout()">Sign Out</button>
+
+
+    <!-- onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
+this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';
+this.form['query'].style.visibility='visible'};" -->
+
+</body>
+</html>
