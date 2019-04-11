@@ -52,9 +52,6 @@ function visitEdit(){
 function visitAdd(){
   window.location='https://miraclemessages.org/refer';
 }
-function visitMetrics(){
-  window.location='metrics.html';
-}
 function visitReviewUpdates(){
   window.location='review_updates.html';
 }
@@ -78,7 +75,7 @@ function visitCreateUser(){
         // if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
         if (user != null && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2')
         // jess's UID
-            window.location.href = "search.html";
+            window.location.href = "index.html";
         else {
             alert(user.email);
             window.location.href = "volunteerCases.html";
@@ -120,7 +117,7 @@ function visitCreateUser(){
       }
   }
 
-  function showDivAdmin() {
+  function showDivLogin() {
    document.getElementById('login').style.visibility = "visible";
   }
 
@@ -135,9 +132,8 @@ function visitCreateUser(){
     <button type="button" id="search" onclick="visitSearch()">Search</button>
     <button type="button" id="edit" onclick="visitEdit()">Edit</button>
     <button type="button" id="add" onclick="visitAdd()">Add</button>
-    <button type="button" id="metrics" onclick="visitMetrics()">Metrics</button>
     <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
-    <button type="button" id="admin" onclick="showDivAdmin()">Admin</button>
+    <button type="button" id="admin" onclick="showDivLogin()">Sign In</button>
     <button type="button" id="create user" onclick="visitCreateUser()">Create New User</button>
     <button type="button" id="sign out" onclick="signout()">Sign Out</button>
 
