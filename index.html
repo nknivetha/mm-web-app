@@ -66,17 +66,19 @@ function visitReviewUpdates(){
 
     var auth = firebase.auth(app);
 
-    function signin_good(user)
+    function signin_good(data)
     {
+        const user = data.user;
       console.log(user);
 
         // this function might get hit twice, first with user null
-        if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
+        // if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
+        if (user != null && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2')
         // jess's UID
             window.location.href = "search.html";
-        else (
+        else {
             window.location.href = "volunteerCases.html";
-        )
+        }
     }
 
     function signin_catch(error)
@@ -91,7 +93,7 @@ function visitReviewUpdates(){
         var email = document.getElementById("myname").value;
         var pword = document.getElementById("mypass").value;
         auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
-        auth.setPersistence(firebase.auth.Auth.Persistance.SESSION).then(
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(
           function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);}
                                                                           );
     }
