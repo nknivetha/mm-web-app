@@ -34,25 +34,29 @@ const isAdmin = false;
 function searchFilter(snapshot)
 {
 
-    var contents = [];
-    allData = snapshot.val();
+    var contents = []; // stores results //
+    allData = snapshot.val(); // get all data from Firebase //
 
     for (k in allData)
     {
-        oneCase = allData[k];    // JSON
-        var checking;
+        oneCase = allData[k];  // one case from the database
+        var checking; // the query to satisfy
 
+        // Search for cases associated with the volunteer name.
         if (checkFrom === 'volunteerName') {
           checking = String(oneCase.volunteerName).toLowerCase();
         }
 
+        // Add to list of results if it matches.
         if (checking.includes(query.toLowerCase())){
           contents.push(String(oneCase.caseID));
         }
     }
 
+    // Get the HTML element that will store all our cases
     var dump = document.getElementById("results");
 
+    // Link cases to their full logs and data so that they are viewable and editable.
     var fixedCase = contents[0].replace(/\d+$/, "")
     dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
     for (var i = 1; i < contents.length; i++) {
@@ -79,6 +83,7 @@ function search()
 
     var searchRef = db.ref(searchFrom);
 
+    // Conduct the search in the database.
     searchRef.orderByKey().on("value",searchFilter);
 }
 
@@ -93,19 +98,19 @@ function search()
 </select>
 
 <input type="text" id="query" name="query">
-
+<!-- On click, the search runs -->
 <input type="button" value="Search" onclick="search()">
 
 </form>
 
 <br>
 
+<!-- Results from the search displayed here. -->
 Results:<br/>
 <div style="height:400px; width:500px; overflow:auto; border:1px solid black">
-  <table id="results" style="width:40%"> 
+  <table id="results" style="width:40%">
   </table>
 </div>
-  <!-- /* Link to view/edit/full log*/ -->
 </form></center>
 </body>
 </html>

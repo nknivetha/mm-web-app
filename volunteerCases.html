@@ -28,9 +28,9 @@
 
 var db = firebase.database(app);
 // field in db to check from (i.e. our search criteria)
-var checkFrom = ""; 
+var checkFrom = "";
 // what we're trying to match the field to (i.e. our search value)
-var query; 
+var query;
 var auth = app.auth();
 var isAdmin = false;
 
@@ -41,7 +41,7 @@ auth.onAuthStateChanged(function(user) {
   if (user) {
     query = user.email
     console.log(user)
-  } 
+  }
 
   // Otherwise, alert the user they're not logged in and redirect to login page
   else {
@@ -59,12 +59,12 @@ function getCases() {
   // Get the HTML element that will hold all the case links
   var dump = document.getElementById("results");
 
-  // Seaching from the volunteers collection and checking from the 
+  // Seaching from the volunteers collection and checking from the
   // volunteerID field
   searchFrom = 'volunteers';
   checkFrom = 'volunteerID';
 
-  // Search the database for our specified fields and using our 
+  // Search the database for our specified fields and using our
   // searchFilter() function
   var searchRef = db.ref(searchFrom);
   searchRef.orderByKey().on("value",searchFilter);
@@ -98,13 +98,13 @@ function searchFilter(snapshot)
     if (checking.includes(query.toLowerCase())) {
       assigned.push(String(oneCase.caseID));
     }
-    
+
     // Otherwise, check if the volunteer's contact info is blank (i.e. the
     // case is unassigned), add the caseID to our unassigned cases array
     else if (checking === "") {
       unassigned.push(String(oneCase.caseID));
     }
-          
+
   }
 
   // Get the HTML element that will store all our cases
@@ -113,7 +113,7 @@ function searchFilter(snapshot)
   // Take each assigned case and display it in our HTML cases table
   for (var i = 0; i < assigned.length; i++) {
     // First, handle formatting for the caseID so it can be used to create a
-    // hyperlink to the edit page for that case 
+    // hyperlink to the edit page for that case
     fixedCase = assigned[i].replace(/\d+$/, "")
 
     // Add a row in the case table to display the specific case
@@ -123,7 +123,7 @@ function searchFilter(snapshot)
   // Take each unassigned case and display it in our HTML cases table
   for (var i = 0; i < unassigned.length; i++) {
     // First, handle formatting for the caseID so it can be used to create a
-    // hyperlink to the edit page for that case 
+    // hyperlink to the edit page for that case
     fixedCase = unassigned[i].replace(/\d+$/, "")
 
     // Add a row in the case table to display the specific case
