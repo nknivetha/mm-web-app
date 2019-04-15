@@ -79,7 +79,8 @@
                     document.getElementById('Case Name').innerHTML = html;
 
                     // Get the data from the proposed branch.
-                    getData(caseID, originalData, parentDir, firstNoteOnly=true);
+                    getData(caseID, originalData, parentDir);
+                    getData(caseID, originalData, "/", numNotes=3, onlyNotes=true);
                 }
             });
         }
@@ -151,10 +152,6 @@
             // to 0 becuase if the 'proposed' collection is not in the
             // database, then 'proposed/smallest_id' will be null.
             proposalID = snapshot.val() + 1 - 1;
-
-            // Update the proposal ID.
-            // const newID = (proposalID + Object.keys(alteredData).length) % 4000000000;
-            // db.ref('proposed').update({id: newID});
 
             readNext();
         });

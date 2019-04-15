@@ -117,25 +117,19 @@ function addFromRef(dataRef, header, id, originalData) {
 }
 
 // Read some documents from the database.
-function getData(caseID, originalData, parentDir='', firstNoteOnly=false) {
+function getData(caseID, originalData, parentDir='', numNotes=100000, onlyNotes=false) {
     // Get all of the information for this case.
-    addFromRef(db.ref(parentDir + '/cases/' + caseID), 'Case Overview', caseID, originalData);
-    addFromRef(db.ref(parentDir + '/clients/' + caseID), 'Client', caseID, originalData);
-    addFromRef(db.ref(parentDir + '/loved_ones/' + caseID), 'Loved Ones', caseID, originalData);
-    addFromRef(db.ref(parentDir + '/records/' + caseID), 'Records', caseID, originalData);
-    addFromRef(db.ref(parentDir + '/volunteers/' + caseID), 'Volunteer', caseID, originalData);
+    if (!onlyNotes) {
+        addFromRef(db.ref(parentDir + '/cases/' + caseID), 'Case Overview', caseID, originalData);
+        addFromRef(db.ref(parentDir + '/clients/' + caseID), 'Client', caseID, originalData);
+        addFromRef(db.ref(parentDir + '/loved_ones/' + caseID), 'Loved Ones', caseID, originalData);
+        addFromRef(db.ref(parentDir + '/records/' + caseID), 'Records', caseID, originalData);
+        addFromRef(db.ref(parentDir + '/volunteers/' + caseID), 'Volunteer', caseID, originalData);
+    }
 
     // Setup the query to the notes.
     let notesQuery = null;
-
-    if (firstNoteOnly) {
-        // We only want to get the first note. This is used for the 'proposed'
-        // branch of the database, as the caseID is not stored in the note.
-        notesQuery = db.ref(parentDir + '/notes/').limitToFirst(1);
-    }
-    else {
-        notesQuery = db.ref(parentDir + '/notes/').orderByChild('caseID').equalTo(caseID);
-    }
+    notesQuery = db.ref(parentDir + '/notes/').orderByChild('caseID').equalTo(caseID).limitToLast(numNotes);
 
     notesQuery.once('value').then(function(snapshot) {
         data = snapshot.val();

@@ -32,17 +32,19 @@ var query; // user input of what to check for
 var auth = app.auth();
 var isAdmin = false;
 
-// Check if user is signed in - only allow access to the page if they are
-// If not logged into the admin account, redirect to the volunteer
-// search page.
+// Check if a user is signed in - only allow access to the page if they are
+// If not logged, redirect to the login page
 auth.onAuthStateChanged(function(user) {
+  // If a user is signed in, log it and record their email address as query
   if (user) {
-    query = user.email;
-    console.log(user);
-    // User is signed in.
-  } else {
-    alert("not logged in as admin");
-    window.location.href = 'volunteerSearch.html';
+    query = user.email
+    console.log(user)
+  } 
+
+  // Otherwise, alert the user they're not logged in and redirect to login page
+  else {
+    alert("not logged in");
+    window.location.href = 'index.html';
   }
 });
 
@@ -115,6 +117,6 @@ Results:<br/>
   <table id="results" style="width:70%">
   </table>
 </div>
-  <!-- /* Link to view/edit/full log*/ -->
+
 </body>
 </html>

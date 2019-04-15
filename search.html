@@ -33,17 +33,21 @@ var query; // user input of what to check for
 var auth = app.auth();
 var isAdmin = false;
 
-// Check if user is signed in - only allow access to the page if they are
-// If not logged into the admin account, redirect to the volunteer
-// search page.
+// Admin Authentication
+// Check if admin is signed in - only allow access to the page if they are
+// If not logged into the admin account, redirect to the login page
 auth.onAuthStateChanged(function(user) {
+  // Check if a user is signed in and that that user is Jess - 
+  // 5NGsBgjCngOZmX7ANHCM9r63xfD2 is Jess' user ID
   if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
     isAdmin = true;
     console.log(user);
-    // User is signed in.
-  } else {
+  } 
+
+  // If Jess not signed in - alert the user and redirect to login page
+  else {
     alert("not logged in as admin");
-    window.location.href = 'volunteerSearch.html';
+    window.location.href = 'index.html';
   }
 });
 
