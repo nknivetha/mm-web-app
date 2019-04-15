@@ -27,8 +27,10 @@
 
 
 var db = firebase.database(app);
-var checkFrom = ""; // field to check from
-var query; // user input of what to check for
+// field in db to check from (i.e. our search criteria)
+var checkFrom = ""; 
+// what we're trying to match the field to (i.e. our search value)
+var query; 
 var auth = app.auth();
 var isAdmin = false;
 
@@ -48,71 +50,100 @@ auth.onAuthStateChanged(function(user) {
   }
 });
 
-function getCases()
-{
-contents = "";
-var dump = document.getElementById("results");
 
-searchFrom = 'volunteers';
-checkFrom = 'volunteerID';
+// Gets all the cases relevant to the volunteer
+function getCases() {
+  // Create an empty string that will later hold all the case links
+  contents = "";
 
-var searchRef = db.ref(searchFrom);
+  // Get the HTML element that will hold all the case links
+  var dump = document.getElementById("results");
 
-searchRef.orderByKey().on("value",searchFilter);
+  // Seaching from the volunteers collection and checking from the 
+  // volunteerID field
+  searchFrom = 'volunteers';
+  checkFrom = 'volunteerID';
+
+  // Search the database for our specified fields and using our 
+  // searchFilter() function
+  var searchRef = db.ref(searchFrom);
+  searchRef.orderByKey().on("value",searchFilter);
 }
 
-// Goes through the field, and adds it to the list if it matches the criteria
+// Takes all the cases, and checks each to see if it matches the search
+// criteria
 function searchFilter(snapshot)
 {
 
-    var assigned = [];
-    var unassigned = []
-    var isUnassigned = []
-    allData = snapshot.val();
+  // Empty array to hold all the cases explicitly assigned to the volunteer
+  var assigned = [];
 
-    for (k in allData)
-    {
-        oneCase = allData[k];    // JSON
-        var checking;
+  // Empty array to hold all the cases not explicitly assigned to anyone
+  var unassigned = []
 
-        if (checkFrom === 'volunteerID') {
-          checking = String(oneCase.volunteerContactInfo).toLowerCase();
-        }
+  // Get all the data (all the case) in the database
+  allData = snapshot.val();
 
-        if (checking.includes(query.toLowerCase())) {
-          assigned.push(String(oneCase.caseID));
-        }
-        if (checking === "") {
-          isUnassigned.push("(unassigned case)");
-          unassigned.push(String(oneCase.caseID));
-        }
+  // Go through each case and see if the case matches the search criteria
+  for (k in allData) {
+    // Get an individual case (recall data stored as a JSON obj in Firebase)
+    oneCase = allData[k];
+
+    // Specific field we are checking to see if it matches the search criteria
+    // (here, the volunteer's contact info field)
+    var checking = String(oneCase.volunteerContactInfo).toLowerCase();
+
+    // Check if the volunteer's contact info contains the user's email addr
+    // If so - add the caseID to our assigned cases array
+    if (checking.includes(query.toLowerCase())) {
+      assigned.push(String(oneCase.caseID));
+    }
+    
+    // Otherwise, check if the volunteer's contact info is blank (i.e. the
+    // case is unassigned), add the caseID to our unassigned cases array
+    else if (checking === "") {
+      unassigned.push(String(oneCase.caseID));
+    }
           
-    }
+  }
 
-    var dump = document.getElementById("results");
+  // Get the HTML element that will store all our cases
+  var dump = document.getElementById("results");
 
-    var fixedCase = assigned[0].replace(/\d+$/, "")
-    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + assigned[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-    for (var i = 1; i < assigned.length; i++) {
-      fixedCase = assigned[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-    }
+  // Take each assigned case and display it in our HTML cases table
+  for (var i = 0; i < assigned.length; i++) {
+    // First, handle formatting for the caseID so it can be used to create a
+    // hyperlink to the edit page for that case 
+    fixedCase = assigned[i].replace(/\d+$/, "")
 
-    for (var i = 0; i < unassigned.length; i++) {
-      fixedCase = unassigned[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' ' + isUnassigned[i] + '</a> </th> </tr>';
-    }
+    // Add a row in the case table to display the specific case
+    dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+  }
+
+  // Take each unassigned case and display it in our HTML cases table
+  for (var i = 0; i < unassigned.length; i++) {
+    // First, handle formatting for the caseID so it can be used to create a
+    // hyperlink to the edit page for that case 
+    fixedCase = unassigned[i].replace(/\d+$/, "")
+
+    // Add a row in the case table to display the specific case
+    dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' (case unassigned) </a> </th> </tr>';
+  }
 }
 
 
 </script>
+
+<!-- Run getCases() when the page loads to search the database and get
+     relevant cases for the volunteer -->
 <body onload="getCases();">
 
 <center>
 
 <br>
 
-Results:<br/>
+<!-- Displays all the relevant cases for the volunteer -->
+Cases:<br/>
 <div style="height:400px; width:800px; overflow:auto; border:1px solid black">
   <table id="results" style="width:70%">
   </table>
