@@ -37,12 +37,12 @@ var isAdmin = false;
 // Check if admin is signed in - only allow access to the page if they are
 // If not logged into the admin account, redirect to the login page
 auth.onAuthStateChanged(function(user) {
-  // Check if a user is signed in and that that user is Jess - 
+  // Check if a user is signed in and that that user is Jess -
   // 5NGsBgjCngOZmX7ANHCM9r63xfD2 is Jess' user ID
   if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
     isAdmin = true;
     console.log(user);
-  } 
+  }
 
   // If Jess not signed in - alert the user and redirect to login page
   else {
@@ -60,7 +60,7 @@ function searchFilter(snapshot)
 
     for (k in allData)
     {
-        oneCase = allData[k];    // JSON
+        oneCase = allData[k];
         var checking;
         if (checkFrom === 'deliveryStatus'){
            checking = oneCase.deliveryStatus;
@@ -100,38 +100,40 @@ function search()
 
     var myform = document.getElementById("newsearch");
 
-    query = myform.elements["query"].value //value of query
+    query = myform.elements["query"].value // value of query
     var fld = myform.elements["type"].value; // type of search
 
-    if (fld === 'client'){ //search by client name
-            searchFrom = 'clients';
-            checkFrom = 'name';
+    switch(fld) {
+      case 'client':
+        searchFrom = 'clients';
+        checkFrom = 'name';
+        break;
+      case 'volunteer':
+        searchFrom = 'volunteers';
+        checkFrom = 'volunteerName';
+        break;
+      case 'status':
+        searchFrom = 'cases';
+        checkFrom = 'deliveryStatus';
+        var sel = myform.elements["s_s"].value
+        switch(sel) {
+          case 'undeliv':
+            query = 0;
+            break;
+          case 'deliv':
+            query = 1;
+            break;
+          case 'need':
+            query = -1;
+            break;
+          case 'no':
+            query = -2;
+            break;
+        }
+        break;
+      default:
+        break;
     }
-    else if (fld === 'volunteer'){ //search by volunteer name
-            searchFrom = 'volunteers';
-            checkFrom = 'volunteerName';
-    }
-    else if(fld === 'status'){ //search by case status
-      searchFrom = 'cases';
-      checkFrom = 'deliveryStatus';
-      var sel = myform.elements["s_s"].value
-      if (sel == 'undeliv'){
-        query = 0;
-      }
-      else if (sel == 'deliv'){
-        query = 1;
-      }
-      else if (sel == 'need'){
-        query = -1;
-      }
-      else if (sel == 'no'){
-        query = -2;
-      }
-    }
-          // case 'case_date':
-            // case_dateMatch = el; // where to get date from?
-          // case 'worked_on_date':
-            // worked_on_dateMatch = el; // where to get date from?
 
     var searchRef = db.ref(searchFrom);
 
@@ -148,9 +150,9 @@ this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibi
 this.form['query'].style.visibility='visible'};">
 <option value="" selected="selected">Select...</option>
 <option value="client">Client name</option>
-<option value="case_date">Date of case (MM/YY)</option> /* TODO month/year format */
+<option value="case_date">Date of case (MM/YY)</option> /* TODO */
 <option value="volunteer">Volunteer name</option>
-<option value="worked_on_date">Last worked on date (MM/YY)</option>
+<option value="worked_on_date">Last worked on date (MM/YY)</option> /* TODO */
 <option value="status">Delivery status</option>
 </select>
 
