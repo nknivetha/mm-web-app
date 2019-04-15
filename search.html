@@ -46,14 +46,6 @@ auth.onAuthStateChanged(function(user) {
     window.location.href = 'volunteerSearch.html';
   }
 });
-// var user = auth.currentUser;
-
-// if (user) {
-// //blank if correct login
-// } else {
-//   alert("not logged in");
-// window.location.href = 'index.html';
-// }
 
 // Goes through the field, and adds it to the list if it matches the criteria
 function searchFilter(snapshot)
@@ -98,13 +90,6 @@ function searchFilter(snapshot)
 // Search based on the category and query provided.
 function search()
 {
-    // var auth = firebase.auth(app);
-
-    // auth.onAuthStateChanged(user => {
-    // if(!user) {
-    //   window.location = '/login.html'; //If User is not logged in, redirect to login page
-    // }
-    // });
 
     contents = "";
     var dump = document.getElementById("results");
