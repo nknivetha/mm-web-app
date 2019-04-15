@@ -1,8 +1,11 @@
 <html>
+<!--page for admin to create users-->
+<html>
 <head>
-<title>Create User</title>
+<title>Create Users</title>
 
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
 <script>
   // Initialize Firebase
   var config = {
@@ -13,7 +16,8 @@
     storageBucket: "miraclemessages-v2.appspot.com",
     messagingSenderId: "669586730683"
   };
-  var app = firebase.initializeApp(config);
+  app = firebase.initializeApp(config);
+  var secondaryApp = firebase.initializeApp(config, "Secondary");
 </script>
 
 </head>
@@ -22,76 +26,52 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
 
 <script lang="text/javascript">
-
+var db = firebase.database(app);
+var checkFrom = ""; // field to check from
+var query; // user input of what to check for
 var auth = app.auth();
 var isAdmin = false;
-
-function signin_good(data)
-    {
-        const user = data.user;
-
-        // this function might get hit twice, first with user null
-        // if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
-        if (user != null && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2')
-        // jess's UID
-            window.location.href = "adminHome.html";
-        else {
-            window.location.href = "volunteerHome.html";
-        }
-    }
-
-    function signin_catch(error)
-    {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        alert(error.message);
-    }
-
 // Check if user is signed in - only allow access to the page if they are
 // If not logged into the admin account, redirect to the volunteer
 // search page.
 auth.onAuthStateChanged(function(user) {
-  if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
+  if (user) {
     isAdmin = true;
     console.log(user);
     // User is signed in.
-  } 
-  else if (user) {
-  	auth.signInWithEmailAndPassword("jess@miraclemessages.org", "jessmm").catch(signin_catch).then(signin_good);
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(
-          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);});
-  }
-  else {
+  } else {
     alert("not logged in");
-    window.location.href = 'index.html';
+    window.location.href = 'volunteerSearch.html';
   }
 });
-
-function createUser(){
+  function createUser(){
     var email = document.getElementById("mynamec").value;
     var pword = document.getElementById("mypassc").value;
-    auth.createUserWithEmailAndPassword(email, pword).then(function(user) {
-    var user = auth.currentUser;
-    console.log(user);
-    addCase() // go to html page
-
+    var success = document.getElementById("success");
+    secondaryApp.auth().createUserWithEmailAndPassword(email, pword).then(function(firebaseUser) {
+        console.log("User " + firebaseUser.uid + " created successfully!");
+        success.innerHTML = "User " + email + " created successfully!"
+        secondaryApp.auth().signOut();
     }, function(error) {
         console.log(error.code);
         var errorCode = error.code;
         var errorMessage = error.message;
+        success.innerHTML = error.message;
     });
-  alert('user account successfully created')
   }
-
 </script>
+
+Create new user
 <div id="create">
-
-E-mail: <input type="text" id="mynamec"><br/>
-Password: <input type="text" id="mypassc">
-<input type="button" value="Create User" onclick="createUser()">
-
+  E-mail: <input type="text" id="mynamec"><br/>
+  Password: <input type="text" id="mypassc">
+  <input type="button" value="Create User" onclick="createUser()">
 </div>
+<div id ="success"></div>
+
 </body>
 </html>
