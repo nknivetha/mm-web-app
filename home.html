@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Miracle Messages Web App</title>
+  <link rel="shortcut icon" href="/mm-logo.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="bundle-home.css">
+  <link rel="stylesheet" href="home.scss">
+
+  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+      authDomain: "miraclemessages-v2.firebaseapp.com",
+      databaseURL: "https://miraclemessages-v2.firebaseio.com",
+      projectId: "miraclemessages-v2",
+      storageBucket: "miraclemessages-v2.appspot.com",
+      messagingSenderId: "669586730683"
+    };
+    app = firebase.initializeApp(config);
+  </script>
+
+</head>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+
+<script lang="text/javascript">
+
+
+var db = firebase.database(app);
+// field in db to check from (i.e. our search criteria)
+var checkFrom = "";
+// what we're trying to match the field to (i.e. our search value)
+var query;
+var auth = app.auth();
+var isAdmin = false;
+var data = [];
+
+// Check if a user is signed in - only allow access to the page if they are
+// If not logged, redirect to the login page
+auth.onAuthStateChanged(function(user) {
+  // If a user is signed in, log it and record their email address as query
+  if (user) {
+    query = user.email
+    console.log(user)
+  }
+
+  // Otherwise, alert the user they're not logged in and redirect to login page
+  else {
+    window.location.href = 'index.html';
+  }
+});
+
+// Check for a successful sign out and redirect the user to login page
+function signoutGood() {
+  const user = data.user;
+
+  // Check to make sure no user is currently signed in - if so, redirect to
+  // the login page
+  if (user == null) {
+    alert ("Successfully signed out");
+    window.location.href = "index.html";
+  }
+}
+
+// Handle an unsuccessful signout
+function signoutError(error){
+  // Get the error message and alert the user
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  alert(error.message);
+}
+
+// Signs out the current user 
+function signout(){
+  // If can sign out without error, call signoutGood()
+  // Otherwise, handle any errors in signoutError()
+  auth.signOut().catch(signoutError).then(signoutGood);
+}
+
+// Gets all the cases relevant to the volunteer
+function getCases() {
+  // Create an empty string that will later hold all the case links
+  contents = "";
+
+  // Get the HTML element that will hold all the case links
+  var dump = document.getElementById("results");
+
+  // Seaching from the volunteers collection and checking from the
+  // volunteerID field
+  searchFrom = 'volunteers';
+  checkFrom = 'volunteerID';
+
+  // Search the database for our specified fields and using our
+  // searchFilter() function
+  var searchRef = db.ref(searchFrom);
+  searchRef.orderByKey().on("value",searchFilter);
+}
+
+// Takes all the cases, and checks each to see if it matches the search
+// criteria
+function searchFilter(snapshot)
+{
+
+  // Empty array to hold all the cases explicitly assigned to the volunteer
+  var assigned = [];
+
+  // Empty array to hold all the cases not explicitly assigned to anyone
+  var unassigned = []
+
+  // Get all the data (all the case) in the database
+  allData = snapshot.val();
+
+  // Go through each case and see if the case matches the search criteria
+  for (k in allData) {
+    // Get an individual case (recall data stored as a JSON obj in Firebase)
+    oneCase = allData[k];
+
+    // Specific field we are checking to see if it matches the search criteria
+    // (here, the volunteer's contact info field)
+    var checking = String(oneCase.volunteerContactInfo).toLowerCase();
+
+    // Check if the volunteer's contact info contains the user's email addr
+    // If so - add the caseID to our assigned cases array
+    if (checking.includes(query.toLowerCase())) {
+      assigned.push(String(oneCase.caseID));
+    }
+
+    // Otherwise, check if the volunteer's contact info is blank (i.e. the
+    // case is unassigned), add the caseID to our unassigned cases array
+    else if (checking === "") {
+      unassigned.push(String(oneCase.caseID));
+    }
+
+  }
+
+  // Get the HTML element that will store all our cases
+  var dump = document.getElementById("results");
+
+  // Take each assigned case and display it in our HTML results list
+  for (var i = 0; i < assigned.length; i++) {
+    // First, handle formatting for the caseID so it can be used to create a
+    // hyperlink to the edit page for that case
+    fixedCase = assigned[i].replace(/\d+$/, "");
+
+    caseURL = "edit.html?caseID=" + assigned[i] + "&isAdmin=" + String(isAdmin);
+
+    data.push([caseURL]);
+  }
+
+  // Take each unassigned case and display it in our HTML results list
+  for (var i = 0; i < unassigned.length; i++) {
+    // First, handle formatting for the caseID so it can be used to create a
+    // hyperlink to the edit page for that case
+    fixedCase = unassigned[i].replace(/\d+$/, "");
+
+    caseURL = "edit.html?caseID=" + assigned[i] + "&isAdmin=" + String(isAdmin);
+
+    data.push([caseURL, "Unassigned"]);
+  }
+}
+
+</script>
+<script src="text/javascript" src="home.js"></script>
+
+<header class="mdc-top-app-bar mdc-elevation--z4" style="background-color:#00bfa5">
+  <div class="mdc-top-app-bar__row" >
+    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+      <svg class="mm-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
+       width="75pt" height="30pt" viewBox="-120 0 170 170"
+       preserveAspectRatio="xMidYMid meet">
+        <g transform="translate(-80,190) scale(0.100000,-0.100000)"
+        fill="#ffffff" stroke="none">
+        <path d="M725 1500 l-399 -400 39 -40 39 -40 56 55 c31 30 59 55 63 55 4 0 7
+        -151 7 -335 l0 -335 595 0 595 0 0 335 c0 184 3 335 7 335 4 0 32 -25 63 -55
+        l56 -55 39 40 40 40 -400 400 -400 400 -400 -400z m605 35 l195 -195 -400 0
+        -400 0 195 195 c107 107 199 195 205 195 6 0 98 -88 205 -195z m-3 -512 l-197
+        -198 -197 198 -198 197 395 0 395 0 -198 -197z m33 -128 c129 129 238 235 242
+        235 5 0 8 -124 8 -275 l0 -275 -480 0 -480 0 0 277 0 278 238 -238 237 -237
+        235 235z"/>
+        </g>
+      </svg>
+      <span class="mdc-top-app-bar__title mm-title">Miracle Messages</span>
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+      <span onclick="signout()">Log Out</span>
+    </section>
+</div>
+
+<div class="mdc-tab-bar" role="tablist" style="background-color:#e0f2f1;">
+  <div class="mdc-tab-scroller">
+    <div class="mdc-tab-scroller__scroll-area">
+      <div class="mdc-tab-scroller__scroll-content">
+
+        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">people</span>
+            <span class="mdc-tab__text-label">Cases</span>
+          </span>
+          <span class="mdc-tab-indicator mdc-tab-indicator--active">
+            <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+        <button class="mdc-tab head-tab" role="tab" style="box-shadow: 0 0 1px 0">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">account_box</span>
+            <span class="mdc-tab__text-label">Users</span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+        <button class="mdc-tab head-tab" role="tab">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">person_add</span>
+            <span class="mdc-tab__text-label">Add a Case</span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+<!-- Run getCases() when the page loads to search the database and get
+     relevant cases for the volunteer -->
+<body class="home" onload="getCases();">
+
+  <!-- Displays all the relevant cases for the volunteer -->
+  <div id="cases"></div>
+  <ul class="mdc-list mdc-list--two-line" id=""></ul>
+
+
+  <script src="bundle-home.js"></script>
+</body>
+</html>

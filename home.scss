@@ -1,0 +1,20 @@
+@import "./common";
+@import "./variables";
+@import "@material/list/mdc-list";
+@import "@material/top-app-bar/mdc-top-app-bar";
+@import "@material/elevation/mdc-elevation";
+@import "@material/tab-bar/mdc-tab-bar";
+@import "@material/tab-scroller/mdc-tab-scroller";
+@import "@material/tab-indicator/mdc-tab-indicator";
+@import "@material/tab/mdc-tab";
+
+
+.mm-title {
+  fill: $mdc-theme-primary;
+  font-size: 24pt;
+}
+
+.head-tab {
+  background-color: #e0f2f1;
+}
+
