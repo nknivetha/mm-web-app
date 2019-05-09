@@ -6,7 +6,6 @@ import {MDCList} from '@material/list';
 import {MDCTopAppBar} from '@material/top-app-bar';
 import {MDCRipple} from '@material/ripple';
 
-
 const list = new MDCList(document.querySelector('.mdc-list'));
 
 const listItemRipples = list.listElements.map((listItemEl) => new MDCRipple(listItemEl));
@@ -38,12 +37,12 @@ class App extends React.Component {
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
             return (
-                <a href={value}>{value}</a>
+                <a href={value.split("*")[0]}>{value.split("*")[1]}</a>
               );
           }
         }
       },
-    "Last Updated", "Unassigned\?"];
+    "Unassigned\?", "Last Updated"];
 
     const options = {
       filterType: "dropdown",

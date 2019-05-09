@@ -2,9 +2,85 @@
 
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Miracle Messages Web App</title>
+  <link rel="shortcut icon" href="/mm-logo.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="bundle-edit.css">
+  <link rel="stylesheet" href="edit.scss">
 
-    <title>View and Edit</title>
+  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
 </head>
+
+<script src="text/javascript" src="edit.js"></script>
+
+<header class="mdc-top-app-bar mdc-elevation--z4" style="background-color:#00bfa5">
+  <div class="mdc-top-app-bar__row" >
+    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+      <svg class="mm-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
+       width="75pt" height="30pt" viewBox="-120 0 170 170"
+       preserveAspectRatio="xMidYMid meet">
+        <g transform="translate(-80,190) scale(0.100000,-0.100000)"
+        fill="#ffffff" stroke="none">
+        <path d="M725 1500 l-399 -400 39 -40 39 -40 56 55 c31 30 59 55 63 55 4 0 7
+        -151 7 -335 l0 -335 595 0 595 0 0 335 c0 184 3 335 7 335 4 0 32 -25 63 -55
+        l56 -55 39 40 40 40 -400 400 -400 400 -400 -400z m605 35 l195 -195 -400 0
+        -400 0 195 195 c107 107 199 195 205 195 6 0 98 -88 205 -195z m-3 -512 l-197
+        -198 -197 198 -198 197 395 0 395 0 -198 -197z m33 -128 c129 129 238 235 242
+        235 5 0 8 -124 8 -275 l0 -275 -480 0 -480 0 0 277 0 278 238 -238 237 -237
+        235 235z"/>
+        </g>
+      </svg>
+      <span class="mdc-top-app-bar__title mm-title" style="font-size: 24pt">Miracle Messages</span>
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+      <button class="mdc-button" onclick = "signout()">
+        <span class="mdc-button__label">Log Out</span>
+      </button>
+    </section>
+</div>
+
+<div class="mdc-tab-bar" role="tablist" style="background-color:#e0f2f1;">
+  <div class="mdc-tab-scroller">
+    <div class="mdc-tab-scroller__scroll-area">
+      <div class="mdc-tab-scroller__scroll-content">
+
+        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='home.html'"">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">people</span>
+            <span class="mdc-tab__text-label">Cases</span>
+          </span>
+          <span class="mdc-tab-indicator mdc-tab-indicator--active">
+            <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">account_box</span>
+            <span class="mdc-tab__text-label">Users</span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.open('https://miraclemessages.org/refer', '_blank');">
+          <span class="mdc-tab__content">
+            <span class="mdc-tab__icon material-icons" aria-hidden="true">person_add</span>
+            <span class="mdc-tab__text-label">Add a Case</span>
+          </span>
+          <span class="mdc-tab__ripple"></span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+</header>
 
 <body>
     <!-- Setup Firebase -->
@@ -171,5 +247,8 @@
 
     <button type="button" id="edit" onclick=enableEdit()>Edit</button>
     <button type="button" id="save" onclick=save()>Save</button>
+
+
+    <script src="bundle-edit.js"></script>
 </body>
 </html>

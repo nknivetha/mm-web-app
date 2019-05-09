@@ -31,6 +31,7 @@
   <script lang="text/javascript">
   var auth = app.auth();
   var isAdmin = false;
+  var pwd = document.getElementById("password-input");
 
   function signin_good(data){
     const user = data.user;
@@ -47,7 +48,7 @@
   function signin_catch(error){
     var errorCode = error.code;
     var errorMessage = error.message;
-    alert(error.message);
+    alert(errorMessage);
   }
 
   function signin(){
@@ -90,7 +91,6 @@
       <input type="password" class="mdc-text-field__input" id="password-input" name="password" required>
       <label class="mdc-floating-label" for="password-input">Password</label>
       <div class="mdc-line-ripple"></div>
-
     </div>
 
     <div class="button-container">

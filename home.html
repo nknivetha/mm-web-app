@@ -50,9 +50,16 @@ var data = [];
 // If not logged, redirect to the login page
 auth.onAuthStateChanged(function(user) {
   // If a user is signed in, log it and record their email address as query
+  // if they are a volunteer (i.e. not Jess)
   if (user) {
-    query = user.email
-    console.log(user)
+    if (user.email === 'jess@miraclemessages.org') {
+      query = '';
+      isAdmin = true;
+    }
+    else {
+      query = user.email;
+    }
+    console.log(user);
   }
 
   // Otherwise, alert the user they're not logged in and redirect to login page
@@ -68,7 +75,6 @@ function signoutGood() {
   // Check to make sure no user is currently signed in - if so, redirect to
   // the login page
   if (user == null) {
-    alert ("Successfully signed out");
     window.location.href = "index.html";
   }
 }
@@ -132,13 +138,13 @@ function searchFilter(snapshot)
 
     // Check if the volunteer's contact info contains the user's email addr
     // If so - add the caseID to our assigned cases array
-    if (checking.includes(query.toLowerCase())) {
+    if (checking.includes(query.toLowerCase()) && checking != "") {
       assigned.push(String(oneCase.caseID));
     }
 
     // Otherwise, check if the volunteer's contact info is blank (i.e. the
     // case is unassigned), add the caseID to our unassigned cases array
-    else if (checking === "") {
+    else if (checking == "") {
       unassigned.push(String(oneCase.caseID));
     }
 
@@ -153,7 +159,7 @@ function searchFilter(snapshot)
     // hyperlink to the edit page for that case
     fixedCase = assigned[i].replace(/\d+$/, "");
 
-    caseURL = "edit.html?caseID=" + assigned[i] + "&isAdmin=" + String(isAdmin);
+    caseURL = "edit.html?caseID=" + assigned[i] + "&isAdmin=" + String(isAdmin) + "*" + assigned[i];
 
     data.push([caseURL]);
   }
@@ -164,7 +170,7 @@ function searchFilter(snapshot)
     // hyperlink to the edit page for that case
     fixedCase = unassigned[i].replace(/\d+$/, "");
 
-    caseURL = "edit.html?caseID=" + assigned[i] + "&isAdmin=" + String(isAdmin);
+    caseURL = "edit.html?caseID=" + unassigned[i] + "&isAdmin=" + String(isAdmin) + "*" + unassigned[i];
 
     data.push([caseURL, "Unassigned"]);
   }
@@ -190,9 +196,11 @@ function searchFilter(snapshot)
         235 235z"/>
         </g>
       </svg>
-      <span class="mdc-top-app-bar__title mm-title">Miracle Messages</span>
+      <span class="mdc-top-app-bar__title mm-title" style="font-size: 24pt">Miracle Messages</span>
       <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-      <span onclick="signout()">Log Out</span>
+      <button class="mdc-button" onclick = "signout()">
+        <span class="mdc-button__label">Log Out</span>
+      </button>
     </section>
 </div>
 
@@ -201,7 +209,7 @@ function searchFilter(snapshot)
     <div class="mdc-tab-scroller__scroll-area">
       <div class="mdc-tab-scroller__scroll-content">
 
-        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0">
+        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='home.html'"">
           <span class="mdc-tab__content">
             <span class="mdc-tab__icon material-icons" aria-hidden="true">people</span>
             <span class="mdc-tab__text-label">Cases</span>
@@ -212,7 +220,7 @@ function searchFilter(snapshot)
           <span class="mdc-tab__ripple"></span>
         </button>
 
-        <button class="mdc-tab head-tab" role="tab" style="box-shadow: 0 0 1px 0">
+        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0">
           <span class="mdc-tab__content">
             <span class="mdc-tab__icon material-icons" aria-hidden="true">account_box</span>
             <span class="mdc-tab__text-label">Users</span>
@@ -220,7 +228,7 @@ function searchFilter(snapshot)
           <span class="mdc-tab__ripple"></span>
         </button>
 
-        <button class="mdc-tab head-tab" role="tab">
+        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.open('https://miraclemessages.org/refer', '_blank');">
           <span class="mdc-tab__content">
             <span class="mdc-tab__icon material-icons" aria-hidden="true">person_add</span>
             <span class="mdc-tab__text-label">Add a Case</span>

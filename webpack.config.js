@@ -47,6 +47,19 @@ module.exports = [
     },
   },
   {
+    entry: './edit.scss',
+    output: {
+      // This is necessary for webpack to compile, but we never reference this js file.
+      filename: 'style-bundle-edit.js',
+    },
+    module: {
+      rules: [{
+        test: /edit.scss$/,
+        use: getStyleUse('bundle-edit.css')
+      }]
+    },
+  },
+  {
     entry: "./login.js",
     output: {
       filename: "bundle-login.js"
@@ -56,6 +69,19 @@ module.exports = [
         test: /login.js$/,
         loader: 'babel-loader',
         query: {presets: ['env']}
+      }]
+    },
+  },
+  {
+    entry: "./edit.js",
+    output: {
+      filename: "bundle-edit.js"
+    },
+    module: {
+      loaders: [{
+        test: /edit.js$/,
+        loader: 'babel-loader',
+        query: {presets: ['env', 'react']}
       }]
     },
   },
