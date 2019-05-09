@@ -1,5 +1,7 @@
 @import "./common";
 @import "./variables";
+@import "@material/textfield/mdc-text-field";
+@import "@material/button/mdc-button";
 @import "@material/list/mdc-list";
 @import "@material/top-app-bar/mdc-top-app-bar";
 @import "@material/elevation/mdc-elevation";
@@ -8,6 +10,7 @@
 @import "@material/tab-indicator/mdc-tab-indicator";
 @import "@material/tab/mdc-tab";
 @import "@material/card/mdc-card";
+@import "@material/typography/mdc-typography";
 
 
 .mm-title {
@@ -19,16 +22,24 @@
   background-color: #e0f2f1;
 }
 
-.case-info{
-	margin-top: 7em;
-	padding-left: 2em;
+.add-user{
+  padding-top: 6em;
+  padding-left: 2em;
 }
 
-.edit {
-	fill: $mdc-theme-primary;
+.email,
+.password {
+  display: block;
+  width: 300px;
+  margin-left: 3em;
+  margin-bottom: 1em;
 }
 
-.save {
-	fill: $mdc-theme-primary;
+.button-container {
+  justify-content: flex-end;
+  width: 300px;
 }
 
+.button-container button {
+  margin: 3px;
+}

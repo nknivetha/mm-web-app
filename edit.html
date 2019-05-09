@@ -49,7 +49,7 @@
     <div class="mdc-tab-scroller__scroll-area">
       <div class="mdc-tab-scroller__scroll-content">
 
-        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='home.html'"">
+        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='home.html'">
           <span class="mdc-tab__content">
             <span class="mdc-tab__icon material-icons" aria-hidden="true">people</span>
             <span class="mdc-tab__text-label">Cases</span>
@@ -60,10 +60,10 @@
           <span class="mdc-tab__ripple"></span>
         </button>
 
-        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0">
+        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='create_user.html'">
           <span class="mdc-tab__content">
             <span class="mdc-tab__icon material-icons" aria-hidden="true">account_box</span>
-            <span class="mdc-tab__text-label">Users</span>
+            <span class="mdc-tab__text-label">Add a Volunteer</span>
           </span>
           <span class="mdc-tab__ripple"></span>
         </button>
@@ -238,6 +238,8 @@
         getData(caseID, originalData);
     </script>
 
+    <div class="mdc-card case-info">
+
     <div id='Case Overview'></div>
     <div id='Client'></div>
     <div id='Loved Ones'></div>
@@ -245,8 +247,17 @@
     <div id='Records'></div>
     <div id='Volunteer'></div>
 
-    <button type="button" id="edit" onclick=enableEdit()>Edit</button>
-    <button type="button" id="save" onclick=save()>Save</button>
+    <div class="mdc-card__actions">
+        <button class="mdc-button mdc-card__action mdc-card__action--button" id="edit" onclick="enableEdit()">
+            <span class="mdc-button__label">Edit</span>
+        </button>
+
+        <button class="mdc-button mdc-card__action mdc-card__action--button" id="save" onclick="save()">
+            <span class="mdc-button__label">Save</span>
+        </button>
+    </div>
+
+    </div>
 
 
     <script src="bundle-edit.js"></script>
