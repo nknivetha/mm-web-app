@@ -1,187 +1,164 @@
-Please fill out the following questionnaire about the case you've been working on. 
-<!DOCTYPE html>
+<!doctype html>
+<html lang="en">
 
-<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Miracle Messages Web App</title>
-  <link rel="shortcut icon" href="/mm-logo.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="bundle-edit.css">
-  <link rel="stylesheet" href="volupdate.scss">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Miracle Messages Web App</title>
+        <link rel="shortcut icon" href="/mm-logo.ico">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="bundle-edit.css">
+        <link rel="stylesheet" href="volupdate.scss">
+      
+        <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+      
+        <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+      
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="/resources/demos/style.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+      
+        // import {MatDatepickerModule} from '@angular/material/datepicker';
 
-  <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+        $( function() {
+            $( "#datepicker" ).datepicker();
+        } );
 
-  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+        (document).ready(function() {
+        $('input[type="radio"]').click(function() {
+            if($(this).attr('id') == 'one') {
+                    $('#casemore').show();           
+            }
 
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <link rel="stylesheet" href="/resources/demos/style.css">
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script>
-  $( function() {
-    $( "#datepicker" ).datepicker();
-  } );
-    function showDiv(divId, element)
-    {
-        document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
-    }
+            else {
+                    $('#casemore').hide();   
+            }
+        });
+        });
+        function showDiv(divId, element)
+        {
+            document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
+        }
+
+        import {MDCFloatingLabel} from '@material/floating-label';
+
+const floatingLabel = new MDCFloatingLabel(document.querySelector('.mdc-floating-label'));
+import {MDCLineRipple} from '@material/line-ripple';
+
+const lineRipple = new MDCLineRipple(document.querySelector('.mdc-line-ripple'));
   </script>
 
+</head>
 
+<body class="mm-login">
+  <section class="header">
+    <svg class="mm-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
+   width="225.000000pt" height="100pt" viewBox="0 0 225.000000 225.000000"
+   preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(0.000000,250.000000) scale(0.100000,-0.100000)"
+    fill="#000000" stroke="none">
+    <path d="M725 1500 l-399 -400 39 -40 39 -40 56 55 c31 30 59 55 63 55 4 0 7
+    -151 7 -335 l0 -335 595 0 595 0 0 335 c0 184 3 335 7 335 4 0 32 -25 63 -55
+    l56 -55 39 40 40 40 -400 400 -400 400 -400 -400z m605 35 l195 -195 -400 0
+    -400 0 195 195 c107 107 199 195 205 195 6 0 98 -88 205 -195z m-3 -512 l-197
+    -198 -197 198 -198 197 395 0 395 0 -198 -197z m33 -128 c129 129 238 235 242
+    235 5 0 8 -124 8 -275 l0 -275 -480 0 -480 0 0 277 0 278 238 -238 237 -237
+    235 235z"/>
+    </g>
+  </svg>
+    <h1>MIRACLE MESSAGES</h1>
+  </section>
+  <p>Please fill out the following questionnaire about the case you've been working on. </p>
 
-  </head>
+  <form id="updateform">
 
-  <body>
-<script src="text/javascript" src="edit.js"></script>
+    <!-- Client name -->
+        <div class="mdc-text-field">
+                <input type="text" id="clientname" class="mdc-text-field__input"
+                       aria-controls="clientname-helper-text"
+                       aria-describedby="clientname-helper-text">
+                <label for="clientname" class="mdc-floating-label">Client name</label>
+                <div class="mdc-line-ripple"></div>
+              </div>
+              <div class="mdc-text-field-helper-line">
+                <div id="clientname-helper-text" class="mdc-text-field-helper-text" aria-hidden="true">
+                    This should match the name on the case record EXACTLY.
+                </div>
+              </div>
+    <!-- Volunteer name -->
+    <div class="mdc-text-field">
+            <input type="text" id="volname" class="mdc-text-field__input"
+                   aria-controls="volname-helper-text"
+                   aria-describedby="volname-helper-text">
+            <label for="volname" class="mdc-floating-label">Volunteer name</label>
+            <div class="mdc-line-ripple"></div>
+          </div>
+          <div class="mdc-text-field-helper-line">
+            <div id="volname-helper-text" class="mdc-text-field-helper-text" aria-hidden="true">
+                    Volunteer name (this should be the volunteer or student responsible for the case)
+            </div>
+          </div>
+    <!-- Volunteer e-mail -->
+    <div class="mdc-text-field">
+            <input type="text" id="email" class="mdc-text-field__input"
+                   aria-controls="email-helper-text"
+                   aria-describedby="email-helper-text">
+            <label for="email" class="mdc-floating-label">Volunteer e-mail</label>
+            <div class="mdc-line-ripple"></div>
+          </div>
 
-<header class="mdc-top-app-bar mdc-elevation--z4" style="background-color:#00bfa5">
-  <div class="mdc-top-app-bar__row" >
-    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-      <svg class="mm-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
-       width="75pt" height="30pt" viewBox="-120 0 170 170"
-       preserveAspectRatio="xMidYMid meet">
-        <g transform="translate(-80,190) scale(0.100000,-0.100000)"
-        fill="#ffffff" stroke="none">
-        <path d="M725 1500 l-399 -400 39 -40 39 -40 56 55 c31 30 59 55 63 55 4 0 7
-        -151 7 -335 l0 -335 595 0 595 0 0 335 c0 184 3 335 7 335 4 0 32 -25 63 -55
-        l56 -55 39 40 40 40 -400 400 -400 400 -400 -400z m605 35 l195 -195 -400 0
-        -400 0 195 195 c107 107 199 195 205 195 6 0 98 -88 205 -195z m-3 -512 l-197
-        -198 -197 198 -198 197 395 0 395 0 -198 -197z m33 -128 c129 129 238 235 242
-        235 5 0 8 -124 8 -275 l0 -275 -480 0 -480 0 0 277 0 278 238 -238 237 -237
-        235 235z"/>
-        </g>
-      </svg>
-      <span class="mdc-top-app-bar__title mm-title" style="font-size: 24pt">Miracle Messages</span>
-      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-      <button class="mdc-button" onclick = "signout()">
-        <span class="mdc-button__label">Log Out</span>
-      </button>
-    </section>
-</div>
+  <!-- Date-->
+  <div class="mdc-text-field">
 
-<div class="mdc-tab-bar" role="tablist" style="background-color:#e0f2f1;">
-  <div class="mdc-tab-scroller">
-    <div class="mdc-tab-scroller__scroll-area">
-      <div class="mdc-tab-scroller__scroll-content">
+    <input type="text" id="datepicker" class="form-control"></p>
+    <label for="date" class="mdc-floating-label">MM/DD/YYYY</label>
 
-        <button class="mdc-tab mdc-tab--active head-tab" role="tab" aria-selected="true" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.location.href='home.html'">
-          <span class="mdc-tab__content">
-            <span class="mdc-tab__icon material-icons" aria-hidden="true">people</span>
-            <span class="mdc-tab__text-label">Cases</span>
-          </span>
-          <span class="mdc-tab-indicator mdc-tab-indicator--active">
-            <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
-          </span>
-          <span class="mdc-tab__ripple"></span>
-        </button>
-
-        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0">
-          <span class="mdc-tab__content">
-            <span class="mdc-tab__icon material-icons" aria-hidden="true">account_box</span>
-            <span class="mdc-tab__text-label">Users</span>
-          </span>
-          <span class="mdc-tab__ripple"></span>
-        </button>
-
-        <button class="mdc-tab head-tab" role="tab" tabindex="0" style="box-shadow: 0 0 1px 0" onclick="window.open('https://miraclemessages.org/refer', '_blank');">
-          <span class="mdc-tab__content">
-            <span class="mdc-tab__icon material-icons" aria-hidden="true">person_add</span>
-            <span class="mdc-tab__text-label">Add a Case</span>
-          </span>
-          <span class="mdc-tab__ripple"></span>
-        </button>
-
-      </div>
+    <div class="mdc-line-ripple"></div>
     </div>
-  </div>
-</div>
-</header>
+<!-- Case status-->
+    <div class="mdc-form-field" >
+        
+            <div class="mdc-radio">
+                    <input class="mdc-radio__native-control" type="radio" checked name="one">
+                    <div class="mdc-radio__background">
+                      <div class="mdc-radio__outer-circle"></div>
+                      <div class="mdc-radio__inner-circle"></div>
+                    </div>
+                    
+                  </div>
+                  <label for="radio-1">Delivered</label>
+                  <div class="mdc-radio" >
+                    <input class="mdc-radio__native-control" type="radio" checked name="one">
+                    <div class="mdc-radio__background">
+                      <div class="mdc-radio__outer-circle"></div>
+                      <div class="mdc-radio__inner-circle"></div>
+                    </div>
+                  </div>
+                  <label for="radio-2">Undelivered</label>
+    </div>
 
-    <!-- Setup Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
-
-    <script>
-        var config = {
-            apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-            authDomain: "miraclemessages-v2.firebaseapp.com",
-            databaseURL: "https://miraclemessages-v2.firebaseio.com",
-            projectId: "miraclemessages-v2",
-            storageBucket: "miraclemessages-v2.appspot.com",
-            messagingSenderId: "669586730683"
-        };
-        app = firebase.initializeApp(config);
-    </script>
-
-<form class="border border-light p-5">
-
-    <p class="h4 mb-4 text-center">Please fill out the following questionnaire about the case you've been working on. </p>
-
-
-    <input type="text" id="defaultRegisterPhonePassword" class="form-control" placeholder="Client name" aria-describedby="defaultRegisterFormPhoneHelpBlock">
-
-    <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4">This should match the name on the case record EXACTLY.</small>
-
-    <input type="text" id="defaultRegisterPhonePassword" class="form-control" placeholder="Volunteer name" aria-describedby="defaultRegisterFormPhoneHelpBlock">
-
-    <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4">Volunteer name (this should be the volunteer or student responsible for the case)</small>
-
-    <input type="email" id="defaultContactFormEmail" class="form-control mb-4" placeholder="Volunteer e-mail">
-    <label for="datepicker">When did you last work on this case?</label>
-    <input type="text" id="datepicker" class="form-control" placeholder="MM/DD/YYYY"></p>
-    <label for="defaultSelect">Delivery Status. </label>
-    <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4">    If you have been able to reach the loved one, please mark "delivered" below. Otherwise, select "undelivered".
-    </small>
-    <select id="defaultSelect" class="browser-default custom-select mb-4">
-        <option value="" disabled="">Choose option</option>
-        <option value="1" selected="">Delivered</option>
+  <select id="defaultSelect" class="browser-default custom-select mb-4" onchange="showDiv('casemore', this)">
+        <option value="" selected="">Choose option</option>
+        <option value="1">Delivered</option>
         <option value="2">Undelivered</option>
         <option value="3">Not applicable/other</option>
     </select>
-    <div id="reunionmore">
+    <div id="casemore" style="display:none;">
     <label for="how">How did you manage to connect with the loved one? Please include the phone number that worked, the fb page url, the email address, etc. 
         <br>
         <b>This is important! We follow up with the loved ones post-reunion, so we need correct contact information!</b></label>
 
     <textarea class="form-control rounded-0" id="how" rows="5" placeholder=""></textarea>
 </div>
-    <label for="defaultSelect">Reunion Status. Has this client been reunited with the loved one yet?    </label>
-    <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4"> If you have been able to connect the client with the loved one, please select "reunited" below. If not, please select the best answer.
-    </small>   
-    <select id="defaultSelect" class="browser-default custom-select mb-4" onchange="showDiv('reunionmore', this)">
-        <option value="" selected="">Choose option</option>
-        <option value="1">Reunited</option>
-        <option value="2">Not yet reunited</option>
-        <option value="3">Declined</option>
-        <option value="4">Not applicable/other</option>
-    </select>
-    <div id="reunionmore">
-    <label for="how">Please describe the reunion outcome in 1-2 sentences. 
-        <br>
-        <b>This is important--we really to be able to tell our success stories! We would really like to know as much as you can tell us about the reunion and its impact.</b></label>
-
-    <textarea class="form-control rounded-0" id="how" rows="5" placeholder=""></textarea>
-</div>
-    <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="What steps have you taken to solve this case?"></textarea>
-
-    <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="What is your planned next step to solve this case?"></textarea>
-    <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="What questions do you have, especially those that may be preventing you from taking the next step?"></textarea>
-    <textarea class="form-control rounded-0" id="exampleFormControlTextarea2" rows="3" placeholder="What help, if any, do you need from others? 
-    "></textarea>
-
-    <div class="custom-control custom-checkbox mb-4">
-        <input type="checkbox" class="custom-control-input" id="defaultContactFormCopy">
-        <label class="custom-control-label" for="defaultContactFormCopy">Send me a copy of my responses</label>
-    </div>
-
-    <button class="btn btn-info btn-block" type="submit">Send</button>
 </form>
 
-    <script src="bundle-edit.js"></script>
+
+  <script src="bundle-login.js" async></script>
 </body>
 </html>
+
+
