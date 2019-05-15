@@ -17,7 +17,7 @@
         <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
       
       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <link rel="stylesheet" href="/resources/demos/style.css">
+  
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script>
@@ -28,7 +28,7 @@
             $( "#datepicker" ).datepicker();
         } );
 
-        (document).ready(function() {
+        $(function() {
         $('input[type="radio"]').click(function() {
             if($(this).attr('id') == 'one') {
                     $('#casemore').show();           
@@ -44,17 +44,126 @@
             document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
         }
 
-        import {MDCFloatingLabel} from '@material/floating-label';
+        // import {MDCFloatingLabel} from '@material/floating-label';
 
-const floatingLabel = new MDCFloatingLabel(document.querySelector('.mdc-floating-label'));
-import {MDCLineRipple} from '@material/line-ripple';
-
-const lineRipple = new MDCLineRipple(document.querySelector('.mdc-line-ripple'));
   </script>
+
+<!-- <script src="text/javascript" src="edit.js"></script> -->
 
 </head>
 
 <body class="mm-login">
+   <!-- Setup Firebase -->
+   <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+
+   <script>
+       var config = {
+           apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+           authDomain: "miraclemessages-v2.firebaseapp.com",
+           databaseURL: "https://miraclemessages-v2.firebaseio.com",
+           projectId: "miraclemessages-v2",
+           storageBucket: "miraclemessages-v2.appspot.com",
+           messagingSenderId: "669586730683"
+       };
+       app = firebase.initializeApp(config);
+   </script>
+
+   <!-- Import headerToColl (dictionary), getURLParams, formatWords,
+        escapeSingleQuotes, appendHTML, addFromRef, getData -->
+   <script src='utils/database.js'></script>
+
+   <script>
+       // Initialize Firebase
+       const db = firebase.database();
+       var caseID;
+      //  const caseID = URLParams["caseID"];
+
+// Goes through the data, and adds it to the result if it matches the criteria
+function searchFilter(snapshot)
+{   
+    clientquery = myform.elements["clientname"].value
+    volquery = myform.elements["volname"].value 
+    allData = snapshot.val(); // get all data from Firebase //
+    // Go through all the data and find matching instances.
+    for (k in allData)
+    {
+        oneCase = allData[k]; // one case from the database
+        clientname = String(oneCase.name).toLowerCase();
+        volemail= String(oneCase.volunteerEmail).toLowerCase();
+        //   return case ID if it matches
+          if (clientname.includes(clientquery.toLowerCase()) 
+                && volemail.includes(volquery.toLowerCase())){
+                caseID = String(oneCase.caseID);
+          }
+        }   
+}
+// Search based on the category and query provided.
+function getCaseID()
+{
+    
+    contents = "";
+    var myform = document.getElementById("newsearch");
+    var searchRef = db.ref('clients');
+    // Conduct the search in the database.
+    searchRef.orderByKey().on("value",searchFilter);
+}
+
+      //  // Write altered data to the database.
+function writeData() {
+        //   var email =  $("#email").val();
+        //   var date = $("#datepicker").val();
+          // TODO case status
+          // TODO reunion status
+          // case notes (5)
+
+          // get notes to add
+          var lovedonenote =  $("#lovedonenote").val();
+          var casenotes = [];
+          var notes = document.getElementsByClassName("note");
+          for (let i = 0; i < notes.length; i++) {
+            if(notes[i] != null){
+                casenotes += notes[i];
+            }
+          }
+
+           // Collect the current date time
+           var today = new Date;
+           var sec = today.getSeconds();
+           var min = today.getMinutes();
+           var hr = today.getHours();
+           var day = today.getDate();
+           var month = today.getMonth() + 1;
+           var year = today.getFullYear();
+
+           var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
+
+          getCaseID();
+
+           db.ref('proposed/id').once('value').then(function(snapshot) {
+               // Get the next proposal ID. The '+ 1 - 1' is to convert null
+               // to 0 becuase if the 'proposed' collection is not in the
+               // database, then 'proposed/id' will be null.
+               proposalID = snapshot.val() + 1 - 1; // ? 
+
+               // Update the fields.
+      //              // add it to the 'proposed' queue for an admin to approve it.
+      //              
+      //                  // Enqueue the proposed edit to be approved by admin.
+                       newData['dateTime'] = dateTime;
+                       db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                       db.ref('proposed/' + proposalID).update({caseID: caseID});
+
+                       // Update the proposal ID.
+                       proposalID += 1
+                       db.ref('proposed').update({id: proposalID});
+                    });
+                   
+}
+
+      </script>
+
   <section class="header">
     <svg class="mm-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
    width="225.000000pt" height="100pt" viewBox="0 0 225.000000 225.000000"
@@ -118,46 +227,84 @@ const lineRipple = new MDCLineRipple(document.querySelector('.mdc-line-ripple'))
     <label for="date" class="mdc-floating-label">MM/DD/YYYY</label>
 
     <div class="mdc-line-ripple"></div>
-    </div>
+  </div>
 <!-- Case status-->
-    <div class="mdc-form-field" >
+    <!-- <div class="mdc-form-field" > -->
         
-            <div class="mdc-radio">
+            <!-- <div class="mdc-radio">
                     <input class="mdc-radio__native-control" type="radio" checked name="one">
+
                     <div class="mdc-radio__background">
                       <div class="mdc-radio__outer-circle"></div>
                       <div class="mdc-radio__inner-circle"></div>
                     </div>
                     
-                  </div>
+              </div>
                   <label for="radio-1">Delivered</label>
+
                   <div class="mdc-radio" >
-                    <input class="mdc-radio__native-control" type="radio" checked name="one">
+                    <input class="mdc-radio__native-control" type="radio">
                     <div class="mdc-radio__background">
                       <div class="mdc-radio__outer-circle"></div>
                       <div class="mdc-radio__inner-circle"></div>
                     </div>
                   </div>
-                  <label for="radio-2">Undelivered</label>
+                  <label for="radio-2">Undelivered</label> -->
+                  <input type="radio" name="casestatus" id="case-delivered">
+                <label for="case-delivered">Delivered</label>
+    
+      
+      <input type="radio" name="casestatus" id="case-undelivered">
+        <label for="case-undelivered">Undelivered</label>
+        <input type="radio" name="casestatus" id="other">
+                <label for="other">Other</label>
+                <div class="reveal-if-active">
+                  <div id="casemore">
+                    <label for="lovedonenote">How did you manage to connect with the loved one? Please include the phone number that worked, the fb page url, the email address, etc. 
+                        <br>
+                        <b>This is important! We follow up with the loved ones post-reunion, so we need correct contact information!</b></label>
+          
+                    <textarea class="form-control rounded-0" id="lovedonenote" rows="5" placeholder=""></textarea>
+                </div>
+                </div>
+                <label for="defaultSelect">Reunion Status. Has this client been reunited with the loved one yet?    </label>
+        <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4"> If you have been able to connect the client with the loved one, please select "reunited" below. If not, please select the best answer.
+        </small>   
+        <select id="reunionstatus" class="browser-default custom-select mb-4" onchange="showDiv('reunionmore', this)">
+            <option value="" selected="">Choose option</option>
+            <option value="1">Reunited</option>
+            <option value="2">Not yet reunited</option>
+            <option value="3">Declined</option>
+            <option value="4">Not applicable/other</option>
+        </select>
+        <div id="reunionmore">
+        <label for="reunionnote">Please describe the reunion outcome in 1-2 sentences. 
+            <br>
+            <b>This is important--we really to be able to tell our success stories! We would really like to know as much as you can tell us about the reunion and its impact.</b></label>
+    
+        <textarea class="note" id="reunionnote" rows="5" placeholder=""></textarea>
     </div>
+        <textarea class="note" id="note1" rows="3" placeholder="What steps have you taken to solve this case?"></textarea>
+    
+        <textarea class="note" id="note2" rows="3" placeholder="What is your planned next step to solve this case?"></textarea>
+        <textarea class="note" id="note3" rows="3" placeholder="What questions do you have, especially those that may be preventing you from taking the next step?"></textarea>
+        <textarea class="note" id="note4" rows="3" placeholder="What help, if any, do you need from others? 
+        "></textarea>
 
-  <select id="defaultSelect" class="browser-default custom-select mb-4" onchange="showDiv('casemore', this)">
+        <button class="btn btn-info btn-block" type="submit" onclick="writeData()">Send</button>
+    
+    <!-- </div>  -->
+
+  <!-- <select id="defaultSelect" class="browser-default custom-select mb-4" onchange="showDiv('casemore', this)">
         <option value="" selected="">Choose option</option>
         <option value="1">Delivered</option>
         <option value="2">Undelivered</option>
         <option value="3">Not applicable/other</option>
-    </select>
-    <div id="casemore" style="display:none;">
-    <label for="how">How did you manage to connect with the loved one? Please include the phone number that worked, the fb page url, the email address, etc. 
-        <br>
-        <b>This is important! We follow up with the loved ones post-reunion, so we need correct contact information!</b></label>
-
-    <textarea class="form-control rounded-0" id="how" rows="5" placeholder=""></textarea>
-</div>
+    </select> -->
+    
 </form>
 
 
-  <script src="bundle-login.js" async></script>
 </body>
 </html>
 
