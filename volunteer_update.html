@@ -83,8 +83,8 @@
 // Goes through the data, and adds it to the result if it matches the criteria
 function searchFilter(snapshot)
 {   
-    clientquery = myform.elements["clientname"].value
-    volquery = myform.elements["volname"].value 
+    clientquery = $("#clientname").val();
+    clientquery = $("#email").val();
     allData = snapshot.val(); // get all data from Firebase //
     // Go through all the data and find matching instances.
     for (k in allData)
@@ -93,6 +93,7 @@ function searchFilter(snapshot)
         clientname = String(oneCase.name).toLowerCase();
         volemail= String(oneCase.volunteerEmail).toLowerCase();
         //   return case ID if it matches
+        console.log('hi2');
           if (clientname.includes(clientquery.toLowerCase()) 
                 && volemail.includes(volquery.toLowerCase())){
                 caseID = String(oneCase.caseID);
@@ -102,12 +103,21 @@ function searchFilter(snapshot)
 // Search based on the category and query provided.
 function getCaseID()
 {
-    
-    contents = "";
     var myform = document.getElementById("newsearch");
     var searchRef = db.ref('clients');
+    clientquery = $("#clientname").val();
+
+    searchRef.orderByChild('name').equalTo('fake name').on("value", function(snapshot) {
+    console.log(snapshot.val());    alert("hey");
+
+    snapshot.forEach(function(data) {
+        caseID = data.key;
+    });
+
+    });
     // Conduct the search in the database.
-    searchRef.orderByKey().on("value",searchFilter);
+    // searchRef.orderByKey().on("value",searchFilter);
+
 }
 
       //  // Write altered data to the database.
@@ -119,6 +129,7 @@ function writeData() {
           // case notes (5)
 
           // get notes to add
+          console.log('hi');
           var lovedonenote =  $("#lovedonenote").val();
           var casenotes = [];
           var notes = document.getElementsByClassName("note");
@@ -140,6 +151,7 @@ function writeData() {
            var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
 
           getCaseID();
+          console.log(caseID);
 
            db.ref('proposed/id').once('value').then(function(snapshot) {
                // Get the next proposal ID. The '+ 1 - 1' is to convert null
@@ -159,7 +171,7 @@ function writeData() {
                        proposalID += 1
                        db.ref('proposed').update({id: proposalID});
                     });
-                   
+                   alert("hey");
 }
 
       </script>
