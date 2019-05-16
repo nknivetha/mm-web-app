@@ -39,9 +39,9 @@
             }
         });
         });
-        function showDiv(divId, element)
+        function showDiv(divId, element, match)
         {
-            document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
+            document.getElementById(divId).style.display = element.value == match ? 'block' : 'none';
         }
 
         // import {MDCFloatingLabel} from '@material/floating-label';
@@ -78,67 +78,47 @@
        // Initialize Firebase
        const db = firebase.database();
        var caseID;
-      //  const caseID = URLParams["caseID"];
-
-// Goes through the data, and adds it to the result if it matches the criteria
-function searchFilter(snapshot)
-{   
-    clientquery = $("#clientname").val();
-    clientquery = $("#email").val();
-    allData = snapshot.val(); // get all data from Firebase //
-    // Go through all the data and find matching instances.
-    for (k in allData)
-    {
-        oneCase = allData[k]; // one case from the database
-        clientname = String(oneCase.name).toLowerCase();
-        volemail= String(oneCase.volunteerEmail).toLowerCase();
-        //   return case ID if it matches
-        console.log('hi2');
-          if (clientname.includes(clientquery.toLowerCase()) 
-                && volemail.includes(volquery.toLowerCase())){
-                caseID = String(oneCase.caseID);
-          }
-        }   
-}
 // Search based on the category and query provided.
 function getCaseID()
 {
     var myform = document.getElementById("newsearch");
-    var searchRef = db.ref('clients');
-    clientquery = $("#clientname").val();
+    var searchRef = db.ref('volunteers');
+    clientquery = $("#clientname").val().toLowerCase().replace(/\s/g, '');
+    volquery = $("#email").val();
+    // alert(clientquery);
 
-    searchRef.orderByChild('name').equalTo('fake name').on("value", function(snapshot) {
-    console.log(snapshot.val());    alert("hey");
-
-    snapshot.forEach(function(data) {
-        caseID = data.key;
+    searchRef.orderByChild('volunteerContactInfo').equalTo(volquery).on("value", function(snapshot) {
+        // console.log(snapshot.val());
+        snapshot.forEach(function(data) {
+            // caseID = data.key;
+            match = data.key.toLowerCase().replace(/\s/g, '');
+            // console.log(match);
+            if (match.includes(clientquery)) {
+                caseID = data.key;
+                // alert("case is " + data.key);
+            }
+            return;
+        });
     });
-
-    });
-    // Conduct the search in the database.
-    // searchRef.orderByKey().on("value",searchFilter);
-
+    alert("yo");
 }
 
       //  // Write altered data to the database.
 function writeData() {
-        //   var email =  $("#email").val();
-        //   var date = $("#datepicker").val();
-          // TODO case status
-          // TODO reunion status
-          // case notes (5)
 
+          // case status and reunion status
+          var de = document.getElementById("delivstatus").value;
+          var re = document.getElementById("reunionstatus").value;
           // get notes to add
-          console.log('hi');
           var lovedonenote =  $("#lovedonenote").val();
           var casenotes = [];
+
           var notes = document.getElementsByClassName("note");
           for (let i = 0; i < notes.length; i++) {
             if(notes[i] != null){
-                casenotes += notes[i];
+                casenotes.push(notes[i].value);
             }
-          }
-
+        }
            // Collect the current date time
            var today = new Date;
            var sec = today.getSeconds();
@@ -149,29 +129,50 @@ function writeData() {
            var year = today.getFullYear();
 
            var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
-
+        // get case ID
           getCaseID();
-          console.log(caseID);
 
            db.ref('proposed/id').once('value').then(function(snapshot) {
                // Get the next proposal ID. The '+ 1 - 1' is to convert null
                // to 0 becuase if the 'proposed' collection is not in the
                // database, then 'proposed/id' will be null.
                proposalID = snapshot.val() + 1 - 1; // ? 
+ // add it to the 'proposed' queue for an admin to approve it.
 
-               // Update the fields.
-      //              // add it to the 'proposed' queue for an admin to approve it.
-      //              
-      //                  // Enqueue the proposed edit to be approved by admin.
-                       newData['dateTime'] = dateTime;
-                       db.ref('proposed/' + proposalID + '/' + path).set(newData);
-                       db.ref('proposed/' + proposalID).update({caseID: caseID});
+               // Update delivery status and reunion status.
+               path = 'cases/' + caseID
+               let newData = {};
+                newData['deliverStatus'] = de;
+                newData['reunionStatus'] = re;
+
+// Enqueue the proposed edit to be approved by admin.
+                       
 
                        // Update the proposal ID.
                        proposalID += 1
                        db.ref('proposed').update({id: proposalID});
+            
+                       if (lovedonenote != null) {
+                        path = 'loved_ones/' + caseID;
+                        let newData = {};
+                        newData['lastConnected'] = lovedonenote;
+                        newData['dateTime'] = dateTime;
+                       db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                       db.ref('proposed/' + proposalID).update({caseID: caseID});
+                       }
+
+               // Update loved one note.
+               // Update notes.
+               if (casenotes != null) {
+                        path = 'notes/' + caseID;
+                        let newData = {};
+                        newData['note'] = notes;
+                       db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                       db.ref('proposed/' + proposalID).update({caseID: caseID});
+                       }
+
+
                     });
-                   alert("hey");
 }
 
       </script>
@@ -201,7 +202,7 @@ function writeData() {
         <div class="mdc-text-field">
                 <input type="text" id="clientname" class="mdc-text-field__input"
                        aria-controls="clientname-helper-text"
-                       aria-describedby="clientname-helper-text">
+                       aria-describedby="clientname-helper-text" required>
                 <label for="clientname" class="mdc-floating-label">Client name</label>
                 <div class="mdc-line-ripple"></div>
               </div>
@@ -215,7 +216,7 @@ function writeData() {
             <input type="text" id="volname" class="mdc-text-field__input"
                    aria-controls="volname-helper-text"
                    aria-describedby="volname-helper-text">
-            <label for="volname" class="mdc-floating-label">Volunteer name</label>
+            <label for="volname" class="mdc-floating-label" required>Volunteer name</label>
             <div class="mdc-line-ripple"></div>
           </div>
           <div class="mdc-text-field-helper-line">
@@ -227,7 +228,7 @@ function writeData() {
     <div class="mdc-text-field">
             <input type="text" id="email" class="mdc-text-field__input"
                    aria-controls="email-helper-text"
-                   aria-describedby="email-helper-text">
+                   aria-describedby="email-helper-text" required>
             <label for="email" class="mdc-floating-label">Volunteer e-mail</label>
             <div class="mdc-line-ripple"></div>
           </div>
@@ -235,7 +236,7 @@ function writeData() {
   <!-- Date-->
   <div class="mdc-text-field">
 
-    <input type="text" id="datepicker" class="form-control"></p>
+    <input type="text" id="datepicker" class="form-control" required></p>
     <label for="date" class="mdc-floating-label">MM/DD/YYYY</label>
 
     <div class="mdc-line-ripple"></div>
@@ -262,7 +263,7 @@ function writeData() {
                     </div>
                   </div>
                   <label for="radio-2">Undelivered</label> -->
-                  <input type="radio" name="casestatus" id="case-delivered">
+                  <!-- <input type="radio" name="casestatus" id="case-delivered">
                 <label for="case-delivered">Delivered</label>
     
       
@@ -270,7 +271,16 @@ function writeData() {
         <label for="case-undelivered">Undelivered</label>
         <input type="radio" name="casestatus" id="other">
                 <label for="other">Other</label>
-                <div class="reveal-if-active">
+                <div class="reveal-if-active"> -->
+                        <label for="defaultSelect">Delivery Status. </label>
+                        <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4">    If you have been able to reach the loved one, please mark "delivered" below. Otherwise, select "undelivered".
+                        </small>
+                        <select id="delivstatus" class="browser-default custom-select mb-4" onchange="showDiv('casemore', this, 'delivered')" required>
+                            <option value="" disabled="">Choose option</option>
+                            <option value="delivered" selected="">Delivered</option>
+                            <option value="undelivered">Undelivered</option>
+                            <option value="other">Not applicable/other</option>
+                        </select>
                   <div id="casemore">
                     <label for="lovedonenote">How did you manage to connect with the loved one? Please include the phone number that worked, the fb page url, the email address, etc. 
                         <br>
@@ -282,12 +292,12 @@ function writeData() {
                 <label for="defaultSelect">Reunion Status. Has this client been reunited with the loved one yet?    </label>
         <small id="defaultRegisterFormPhoneHelpBlock" class="form-text text-muted mb-4"> If you have been able to connect the client with the loved one, please select "reunited" below. If not, please select the best answer.
         </small>   
-        <select id="reunionstatus" class="browser-default custom-select mb-4" onchange="showDiv('reunionmore', this)">
+        <select id="reunionstatus" class="browser-default custom-select mb-4" onchange="showDiv('reunionmore', this, 'reunited')" required>
             <option value="" selected="">Choose option</option>
-            <option value="1">Reunited</option>
-            <option value="2">Not yet reunited</option>
-            <option value="3">Declined</option>
-            <option value="4">Not applicable/other</option>
+            <option value="reunited">Reunited</option>
+            <option value="notyetreunited">Not yet reunited</option>
+            <option value="declined">Declined</option>
+            <option value="other">Not applicable/other</option>
         </select>
         <div id="reunionmore">
         <label for="reunionnote">Please describe the reunion outcome in 1-2 sentences. 
@@ -296,9 +306,9 @@ function writeData() {
     
         <textarea class="note" id="reunionnote" rows="5" placeholder=""></textarea>
     </div>
-        <textarea class="note" id="note1" rows="3" placeholder="What steps have you taken to solve this case?"></textarea>
+        <textarea class="note" id="note1" rows="3" placeholder="What steps have you taken to solve this case?" required></textarea>
     
-        <textarea class="note" id="note2" rows="3" placeholder="What is your planned next step to solve this case?"></textarea>
+        <textarea class="note" id="note2" rows="3" placeholder="What is your planned next step to solve this case?" required></textarea>
         <textarea class="note" id="note3" rows="3" placeholder="What questions do you have, especially those that may be preventing you from taking the next step?"></textarea>
         <textarea class="note" id="note4" rows="3" placeholder="What help, if any, do you need from others? 
         "></textarea>
