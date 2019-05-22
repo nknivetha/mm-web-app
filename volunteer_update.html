@@ -88,9 +88,7 @@
                 snapshot.forEach(function (data) {
                     match = data.key.toLowerCase().replace(/\s/g, '');
                     if (match.includes(clientquery)) {
-                        // alert(caseID);
                         caseID = data.key;
-                        alert(caseID);
                     }
                     return;
                 });
@@ -103,6 +101,7 @@
             // case status and reunion status
             var de = document.getElementById("delivstatus").value;
             var re = document.getElementById("reunionstatus").value;
+
             // get notes to add
             var lovedonenote = $("#lovedonenote").val();
             var casenotes = [];
@@ -126,42 +125,49 @@
             // get case ID
             getCaseID();
             // add it to the 'proposed' queue for an admin to approve it.
-
+            // if (caseID == null){
+            //     alert('case not found');
+            //     return;
+            // }
             db.ref('proposed/id').once('value').then(function (snapshot) {
                 // Get the next proposal ID. The '+ 1 - 1' is to convert null
                 // to 0 becuase if the 'proposed' collection is not in the
                 // database, then 'proposed/id' will be null.
-                proposalID = snapshot.val() + 1 - 1; // ? 
+                proposalID = snapshot.val() + 1;
                 // console.log(caseID);
                 // Update delivery status and reunion status.
                 path = 'cases/' + caseID
+                if (caseID == null){
+                    alert('case not found');
+                    return;
+                }
                 let newData = {};
                 newData['deliverStatus'] = de;
                 newData['reunionStatus'] = re;
-
+                newData['dateTime'] = dateTime;
+                path = 'cases/' + caseID;
+                db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                db.ref('proposed/' + proposalID).update({ caseID: caseID });
                 // // Enqueue the proposed edit to be approved by admin.
-
-
-                //            // Update the proposal ID.
-                proposalID += 1
                 db.ref('proposed').update({ id: proposalID });
-
-                if (lovedonenote != null) {
+                
+                // Update loved one note.
+                if (lovedonenote == undefined || lovedonenote.length > 0) {
                     path = 'loved_ones/' + caseID;
-                    let newData = {};
-                    newData['lastConnected'] = lovedonenote;
-                    newData['dateTime'] = dateTime;
-                    db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                    let lData = {};
+                    lData['lastConnected'] = lovedonenote;
+                    lData['dateTime'] = dateTime;
+                    db.ref('proposed/' + proposalID + '/' + path).set(lData);
                     db.ref('proposed/' + proposalID).update({ caseID: caseID });
                 }
 
-                // Update loved one note.
                 // Update notes.
-                if (casenotes != null) {
+                if (casenotes === undefined || casenotes.length == 0) {
                     path = 'notes/' + caseID;
-                    let newData = {};
-                    newData['note'] = notes;
-                    db.ref('proposed/' + proposalID + '/' + path).set(newData);
+                    let lData = {};
+                    lData['notes'] = notes;
+                    lData['dateTime'] = dateTime;
+                    db.ref('proposed/' + proposalID + '/' + path).set(lData);
                     db.ref('proposed/' + proposalID).update({ caseID: caseID });
                 }
 
@@ -305,10 +311,9 @@
 
         <textarea class="note" id="note2" rows="3" placeholder="What is your planned next step to solve this case?" required></textarea>
         <textarea class="note" id="note3" rows="3" placeholder="What questions do you have, especially those that may be preventing you from taking the next step?"></textarea>
-        <textarea class="note" id="note4" rows="3" placeholder="What help, if any, do you need from others? 
-        "></textarea>
+        <textarea class="note" id="note4" rows="3" placeholder="What help, if any, do you need from others?"></textarea>
 
-        <button class="btn btn-info btn-block" type="submit" onclick="writeData()">Send</button>
+        <input class="btn btn-info btn-block" type="submit" onclick="writeData()">Send</button>
 
         <!-- </div>  -->
 
