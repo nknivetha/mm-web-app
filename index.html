@@ -14,6 +14,7 @@
     messagingSenderId: "669586730683"
   };
   var app = firebase.initializeApp(config);
+  const db = firebase.database();
 </script>
 
 </head>
@@ -25,21 +26,35 @@
 
 <script lang="text/javascript">
 
-  var auth = app.auth();
-  var isAdmin = false;
+    var auth = app.auth();
+    var isAdmin = false;
 
     function signin_good(data)
     {
         const user = data.user;
 
-        // this function might get hit twice, first with user null
-        // if (user != null && user.uid.equals('5NGsBgjCngOZmX7ANHCM9r63xfD2'))
-        if (user != null && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2')
-        // jess's UID
-            window.location.href = "adminHome.html";
-        else {
-            window.location.href = "volunteerHome.html";
-        }
+        if (user) {
+    		const userTypeRef = db.ref('usertypes/' + user.uid + '/type');
+    		userTypeRef.once('value').then(function(snapshot) {
+    			if (snapshot.val() == 'admin') {
+                    // Send the user to the admin page.
+    				isAdmin = true;
+                    console.log('the user is admin');
+    				console.log('user: ' + user);
+                    window.location.href = "adminHome.html";
+    			}
+    			else {
+                    // Send the user to the volunteer page.
+    				console.log("the user is not admin");
+                    window.location.href = "volunteerHome.html";
+    			}
+    		});
+    	}
+    	else {
+            // Redirect to the login page.
+    		console.log("the user is not logged in");
+            window.location.href = "index.html";
+    	}
     }
 
     function signin_catch(error)

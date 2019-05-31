@@ -14,6 +14,7 @@
 		messagingSenderId: "669586730683"
 	};
 	var app = firebase.initializeApp(config);
+	const db = firebase.database();
 </script>
 
 </head>
@@ -32,20 +33,32 @@ var isAdmin = false;
 // Check if admin is signed in - only allow access to the page if they are
 // If not logged into the admin account, redirect to the login page
 auth.onAuthStateChanged(function(user) {
-	// Check if a user is signed in and that that user is Jess - 
-	// 5NGsBgjCngOZmX7ANHCM9r63xfD2 is Jess' user ID
-	if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
-		isAdmin = true;
-		console.log(user);
-	} 
-
-	// If Jess not signed in - alert the user and redirect to login page
+	// Check if a user is signed in and that that user is admin.
+	if (user) {
+		const userTypeRef = db.ref('usertypes/' + user.uid + '/type');
+		userTypeRef.once('value').then(function(snapshot) {
+			if (snapshot.val() == 'admin') {
+				isAdmin = true;
+				console.log('user: ' + user);
+			}
+			else {
+				console.log("the user is not admin");
+				notAdmin();
+			}
+		});
+	}
 	else {
-		alert("not logged in as admin");
-		window.location.href = 'index.html';
+		console.log("the user is not logged in");
+		notAdmin();
 	}
 });
 
+
+// Give an error that the user is not admin, and redirect to the main page.
+function notAdmin() {
+	alert("not logged in as admin");
+	window.location.href = 'index.html';
+}
 
 // Functions to take you to various pages when the admin clicks on the
 // various page buttons
@@ -92,7 +105,7 @@ function signoutError(error){
 	alert(error.message);
 }
 
-// Signs out the current user 
+// Signs out the current user
 function signout(){
   // If can sign out without error, call signoutGood()
   // Otherwise, handle any errors in signoutError()
@@ -100,7 +113,7 @@ function signout(){
 }
 
 </script>
-	
+
 	<!-- Buttons to navigate to different pages -->
 	<button type="button" id="search" onclick="visitSearch()">Search</button>
   <button type="button" id="add" onclick="visitAdd()">Add</button>

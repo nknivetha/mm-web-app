@@ -37,18 +37,31 @@ var isAdmin = false;
 // Check if admin is signed in - only allow access to the page if they are
 // If not logged into the admin account, redirect to the login page
 auth.onAuthStateChanged(function(user) {
-  // Check that Jess is signed in (5NGsBgjCngOZmX7ANHCM9r63xfD2 is her ID)
-  if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
-    isAdmin = true;
-    console.log(user);
-  }
-
-  // Otherwise, alert the user and redirect to login page
-  else {
-    alert("not logged in as admin");
-    window.location.href = 'index.html';
-  }
+	// Check if a user is signed in and that that user is admin.
+	if (user) {
+		const userTypeRef = db.ref('usertypes/' + user.uid + '/type');
+		userTypeRef.once('value').then(function(snapshot) {
+			if (snapshot.val() == 'admin') {
+				isAdmin = true;
+				console.log('user: ' + user);
+			}
+			else {
+				console.log("the user is not admin");
+				notAdmin();
+			}
+		});
+	}
+	else {
+		console.log("the user is not logged in");
+		notAdmin();
+	}
 });
+
+// Give an error that the user is not admin, and redirect to the main page.
+function notAdmin() {
+	alert("not logged in as admin");
+	window.location.href = 'index.html';
+}
 
 // Goes through the data, and adds it to the result if it matches the criteria
 function searchFilter(snapshot)

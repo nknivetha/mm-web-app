@@ -39,16 +39,31 @@
         // Make sure that the user is an admin, and redirect to the home page
         // if not.
         auth.onAuthStateChanged(function(user) {
-            if (user && user.uid === '5NGsBgjCngOZmX7ANHCM9r63xfD2') {
-                // Admin is signed in.
-                isAdmin = true;
-                console.log(user);
-            } else {
-                alert("not logged in as admin");
-                window.location.href = 'index.html';
-            }
+        	// Check if a user is signed in and that that user is admin.
+        	if (user) {
+        		const userTypeRef = db.ref('usertypes/' + user.uid + '/type');
+        		userTypeRef.once('value').then(function(snapshot) {
+        			if (snapshot.val() == 'admin') {
+        				isAdmin = true;
+        				console.log('user: ' + user);
+        			}
+        			else {
+        				console.log("the user is not admin");
+        				notAdmin();
+        			}
+        		});
+        	}
+        	else {
+        		console.log("the user is not logged in");
+        		notAdmin();
+        	}
         });
 
+        // Give an error that the user is not admin, and redirect to the main page.
+        function notAdmin() {
+        	alert("not logged in as admin");
+        	window.location.href = 'index.html';
+        }
 
         function readNext() {
             const parentDir = 'proposed/' + proposalID;
