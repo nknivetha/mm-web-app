@@ -53,8 +53,13 @@ auth.onAuthStateChanged(function(user) {
     var pword = document.getElementById("mypassc").value;
     var success = document.getElementById("success");
     secondaryApp.auth().createUserWithEmailAndPassword(email, pword).then(function(firebaseUser) {
-        console.log("User " + firebaseUser.uid + " created successfully!");
-        success.innerHTML = "User " + email + " created successfully!"
+        console.log("User " + firebaseUser.user.uid + " created successfully!");
+        success.innerHTML = "User " + email + " created successfully!";
+
+        // Set the user type to volunteer.
+        userTypeRef = db.ref('usertypes/' + firebaseUser.user.uid);
+        userTypeRef.set({'type': 'volunteer'});
+
         secondaryApp.auth().signOut();
     }, function(error) {
         console.log(error.code);
