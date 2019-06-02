@@ -56,9 +56,12 @@ auth.onAuthStateChanged(function(user) {
         console.log("User " + firebaseUser.user.uid + " created successfully!");
         success.innerHTML = "User " + email + " created successfully!";
 
-        // Set the user type to volunteer.
+        // Set the user type to the specified type.
         userTypeRef = db.ref('usertypes/' + firebaseUser.user.uid);
-        userTypeRef.set({'type': 'volunteer'});
+        const typeElem = document.getElementById("usertype");
+        const userType = typeElem.options[typeElem.selectedIndex].value;
+        console.log('user type: ' + userType);
+        userTypeRef.set({'type': userType});
 
         secondaryApp.auth().signOut();
     }, function(error) {
@@ -73,7 +76,12 @@ auth.onAuthStateChanged(function(user) {
 Create new user
 <div id="create">
   E-mail: <input type="text" id="mynamec"><br/>
-  Password: <input type="text" id="mypassc">
+  Password: <input type="text" id="mypassc"><br/>
+  User Type: <select id="usertype">
+                 <option value="volunteer" selected="selected">Volunteer</option>
+                 <option value="super">Super User</option>
+                 <option value="admin">Admin</option>
+             </select><br/>
   <input type="button" value="Create User" onclick="createUser()">
 </div>
 <div id ="success"></div>
