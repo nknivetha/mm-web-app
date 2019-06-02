@@ -84,51 +84,58 @@ function searchFilter(snapshot)
   // Get all the data (all the case) in the database
   allData = snapshot.val();
 
-  // Go through each case and see if the case matches the search criteria
-  for (k in allData) {
-    // Get an individual case (recall data stored as a JSON obj in Firebase)
-    oneCase = allData[k];
+  // Check if the user is admin or a super user so that they can view unassigned
+  // cases.
+  userTypeRef = db.ref('usertypes/' + auth.currentUser.uid + '/type');
+  userTypeRef.once('value').then(function(snapshot) {
+      const getUnassigned = (snapshot.val() == 'admin' || snapshot.val() == 'super');
+      console.log('user can view unassinged cases: ' + getUnassigned);
 
-    // Specific field we are checking to see if it matches the search criteria
-    // (here, the volunteer's contact info field)
-    var checking = String(oneCase.volunteerContactInfo).toLowerCase();
+      // Go through each case and see if the case matches the search criteria
+      for (k in allData) {
+        // Get an individual case (recall data stored as a JSON obj in Firebase)
+        oneCase = allData[k];
 
-    // Check if the volunteer's contact info contains the user's email addr
-    // If so - add the caseID to our assigned cases array
-    if (checking.includes(query.toLowerCase())) {
-      assigned.push(String(oneCase.caseID));
-    }
+        // Specific field we are checking to see if it matches the search criteria
+        // (here, the volunteer's contact info field)
+        var checking = String(oneCase.volunteerContactInfo).toLowerCase();
 
-    // Otherwise, check if the volunteer's contact info is blank (i.e. the
-    // case is unassigned), add the caseID to our unassigned cases array
-    else if (checking === "") {
-      unassigned.push(String(oneCase.caseID));
-    }
+        // Check if the volunteer's contact info contains the user's email addr
+        // If so - add the caseID to our assigned cases array
+        if (checking.includes(query.toLowerCase())) {
+          assigned.push(String(oneCase.caseID));
+        }
 
-  }
+        // Otherwise, check if the volunteer's contact info is blank (i.e. the
+        // case is unassigned), add the caseID to our unassigned cases array
+        else if (getUnassigned && checking === "") {
+          unassigned.push(String(oneCase.caseID));
+        }
+      }
 
-  // Get the HTML element that will store all our cases
-  var dump = document.getElementById("results");
+      // Get the HTML element that will store all our cases
+      var dump = document.getElementById("results");
 
-  // Take each assigned case and display it in our HTML cases table
-  for (var i = 0; i < assigned.length; i++) {
-    // First, handle formatting for the caseID so it can be used to create a
-    // hyperlink to the edit page for that case
-    fixedCase = assigned[i].replace(/\d+$/, "")
+      // Take each assigned case and display it in our HTML cases table
+      for (var i = 0; i < assigned.length; i++) {
+        // First, handle formatting for the caseID so it can be used to create a
+        // hyperlink to the edit page for that case
+        fixedCase = assigned[i].replace(/\d+$/, "")
 
-    // Add a row in the case table to display the specific case
-    dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-  }
+        // Add a row in the case table to display the specific case
+        dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+      }
 
-  // Take each unassigned case and display it in our HTML cases table
-  for (var i = 0; i < unassigned.length; i++) {
-    // First, handle formatting for the caseID so it can be used to create a
-    // hyperlink to the edit page for that case
-    fixedCase = unassigned[i].replace(/\d+$/, "")
+      // Take each unassigned case and display it in our HTML cases table
+      for (var i = 0; i < unassigned.length; i++) {
+        // First, handle formatting for the caseID so it can be used to create a
+        // hyperlink to the edit page for that case
+        fixedCase = unassigned[i].replace(/\d+$/, "")
 
-    // Add a row in the case table to display the specific case
-    dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' (case unassigned) </a> </th> </tr>';
-  }
+        // Add a row in the case table to display the specific case
+        dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' (case unassigned) </a> </th> </tr>';
+      }
+    });
 }
 
 
