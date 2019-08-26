@@ -8,18 +8,49 @@
 
 <script>
   // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-    authDomain: "miraclemessages-v2.firebaseapp.com",
-    databaseURL: "https://miraclemessages-v2.firebaseio.com",
-    projectId: "miraclemessages-v2",
-    storageBucket: "miraclemessages-v2.appspot.com",
-    messagingSenderId: "669586730683"
-  };
+  /*
+   var config = {
+   apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+   authDomain: "miraclemessages-v2.firebaseapp.com",
+   databaseURL: "https://miraclemessages-v2.firebaseio.com",
+   projectId: "miraclemessages-v2",
+   storageBucket: "miraclemessages-v2.appspot.com",
+   messagingSenderId: "669586730683"
+   };
+   */
+var config = {
+	apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+	authDomain: "miqestaq-demo.firebaseapp.com",
+	databaseURL: "https://miqestaq-demo.firebaseio.com",
+	projectId: "miqestaq-demo",
+	storageBucket: "miqestaq-demo.appspot.com",
+	messagingSenderId: "400510099187"
+};
+
   app = firebase.initializeApp(config);
   var secondaryApp = firebase.initializeApp(config, "Secondary");
 </script>
 
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<script>
+	const buttonRipple = new MDCRipple(document.querySelector('.mdc-button'));
+	const textField = new MDCTextField(document.querySelector('.mdc-text-field'));
+	const floatLabel = new MDCFloatingLabel(document.querySelector('.mdc-floating-label'));
+	const notchedOut = new MDCNotchedOutline(document.querySelector('.mdc-notched-outline'));
+	const hitSelect = new MDCSelect(document.querySelector('.mdc-select'));
+</script>
+<style>
+/* fallback */
+@font-face {
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://fonts.gstatic.com/s/materialicons/v47/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+</style>
 </head>
 <body>
 
@@ -54,7 +85,7 @@ auth.onAuthStateChanged(function(user) {
     var success = document.getElementById("success");
     secondaryApp.auth().createUserWithEmailAndPassword(email, pword).then(function(firebaseUser) {
         console.log("User " + firebaseUser.user.uid + " created successfully!");
-        success.innerHTML = "User " + email + " created successfully!";
+        success.value = "User " + email + " created successfully!";
 
         // Set the user type to the specified type.
         userTypeRef = db.ref('usertypes/' + firebaseUser.user.uid);
@@ -68,23 +99,74 @@ auth.onAuthStateChanged(function(user) {
         console.log(error.code);
         var errorCode = error.code;
         var errorMessage = error.message;
-        success.innerHTML = error.message;
+        success.value = error.message;
     });
   }
 </script>
 
-Create new user
-<div id="create">
-  E-mail: <input type="text" id="mynamec"><br/>
-  Password: <input type="text" id="mypassc"><br/>
-  User Type: <select id="usertype">
-                 <option value="volunteer" selected="selected">Volunteer</option>
-                 <option value="super">Super User</option>
-                 <option value="admin">Admin</option>
-             </select><br/>
-  <input type="button" value="Create User" onclick="createUser()">
+<center>
+<h2 class="material-icons">CREATE A NEW USER</h2>
+</center>
+
+<div id="create" style:"display:flex;">
+	<center>
+	<div class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--focused" style="width:400px;">
+		<input type="text" id="mynamec" class="mdc-text-field__input">
+		<div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+			<div class="mdc-notched-outline__leading"></div>
+			<div class="mdc-notched-outline__notch" style="width: 46px;">
+				<label class="mdc-floating-label mdc-floating-label--float-above" for="mynamec" style="">E-mail</label>
+			</div>
+			<div class="mdc-notched-outline__trailing"></div>
+		</div>
+	</div>
+	
+	<br/><br/>
+	
+	<div class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--focused" style="width:400px;">
+		<input type="text" id="mypassc" class="mdc-text-field__input">
+		<div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+			<div class="mdc-notched-outline__leading"></div>
+			<div class="mdc-notched-outline__notch" style="width: 64px;">
+				<label class="mdc-floating-label mdc-floating-label--float-above" for="mypassc" style="">Password</label>
+			</div>
+			<div class="mdc-notched-outline__trailing"></div>
+		</div>
+	</div>
+	
+	<br/><br/>
+	
+	<div class="mdc-select mdc-select--outlined">
+		<i class="mdc-select__dropdown-icon"></i>
+		<select class="mdc-select__native-control" id="usertype" type="hidden">
+			<option value disabled></option>
+			<option value="volunteer">Volunteer</option>
+			<option value="super">Super User</option>
+			<option value="admin">Administrator</option>
+		</select>
+		<div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+			<div class="mdc-notched-outline__leading"></div>
+			<div class="mdc-notched-outline__notch" style="width:33px:">
+				<label for="usertype" class="mdc-floating-label mdc-floating-label mdc-floating-label--float-above" style>New User Type</label>
+			</div>
+			<div class="mdc-notched-outline__trailing"></div>
+		</div>
+	</div>
+	
+	<br/><br/>
+
+	<button class="mdc-button" onclick="createUser()" style="height:40px;">
+		<span class="mdc-button--raised"><br/>Create User<br/>&nbsp;</span>
+	</button>
+
+	<br/><br/>
+	
+	<div class="mdc-text-field mdc-text-field--disabled">
+		<input type="text" id="success" class="mdc-text-field__input" disabled style="width: 640px;">
+	</div>
+
+	</center>
 </div>
-<div id ="success"></div>
 
 </body>
 </html>

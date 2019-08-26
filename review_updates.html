@@ -13,14 +13,26 @@
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 
     <script>
-        var config = {
-            apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-            authDomain: "miraclemessages-v2.firebaseapp.com",
-            databaseURL: "https://miraclemessages-v2.firebaseio.com",
-            projectId: "miraclemessages-v2",
-            storageBucket: "miraclemessages-v2.appspot.com",
-            messagingSenderId: "669586730683"
-        };
+		/*
+		 var config = {
+		 apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+		 authDomain: "miraclemessages-v2.firebaseapp.com",
+		 databaseURL: "https://miraclemessages-v2.firebaseio.com",
+		 projectId: "miraclemessages-v2",
+		 storageBucket: "miraclemessages-v2.appspot.com",
+		 messagingSenderId: "669586730683"
+		 };
+		 */
+	var config = {
+		apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+		authDomain: "miqestaq-demo.firebaseapp.com",
+		databaseURL: "https://miqestaq-demo.firebaseio.com",
+		projectId: "miqestaq-demo",
+		storageBucket: "miqestaq-demo.appspot.com",
+		messagingSenderId: "400510099187"
+	};
+	
+
         app = firebase.initializeApp(config);
     </script>
 
@@ -62,7 +74,7 @@
         // Give an error that the user is not admin, and redirect to the main page.
         function notAdmin() {
         	alert("not logged in as admin");
-        	window.location.href = 'index.html';
+        	window.location.href = 'login.html';
         }
 
         function readNext() {
@@ -79,19 +91,19 @@
                     db.ref('proposed').update({id: 0, smallest_id: 0});
 
                     // Display a message so the user knows the queue is empyt.
-                    const section = document.getElementById('Empty Queue');
+                    const section = document.getElementById('EmptyQueue');
                     let html = '<h4>There are no more updates to be reviewed.</h4>';
                     section.innerHTML = html;
 
                     // Remove the case name and buttons.
-                    document.getElementById('Case Name').style.display = 'none';
+                    document.getElementById('caseName').style.display = 'none';
                     document.getElementById('accept').style.display = 'none';
                     document.getElementById('reject').style.display = 'none';
                 }
                 else {
                     // Show the case ID.
                     const html = '<h4>Case ID: ' + caseID + '</h4>';
-                    document.getElementById('Case Name').innerHTML = html;
+                    document.getElementById('caseName').innerHTML = html;
 
                     // Get the data from the proposed branch.
                     getData(caseID, originalData, parentDir);
@@ -172,7 +184,7 @@
         });
 
     </script>
-
+<!--//
     <div id='Case Name'></div>
 
     <div id='Case Overview'></div>
@@ -182,8 +194,22 @@
     <div id='Records'></div>
     <div id='Volunteer'></div>
     <div id='Empty Queue'></div>
-
-    <button type="button" id="accept" onclick=approve()>Accept</button>
-    <button type="button" id="reject" onclick=discard()>Reject</button>
+//-->
+	<style>
+		input {width: 400px;}
+		.altColor2 {background-color: #eef; border-color: #eef;}
+		.altColor1 {background-color: #ddf; border-color: #ddf;}
+		.caseTable {border-collapse: collapse; border-width: thick;}
+		.tallButton {height:30px;}
+	</style>
+	<div class="altColor2">
+		<center><h2><span id="caseName">...</span>
+			<button type="button" class="tallButton" id="edit" onclick="approve()">Accept</button>
+			<button type="button" class="tallButton" id="save" onclick="discard()">Reject</button>
+		</h2></center>
+	</div>
+	<div id="EmptyQueue"></div>
+	<table id="CaseData" class="caseTable">
+	</table>
 </body>
 </html>

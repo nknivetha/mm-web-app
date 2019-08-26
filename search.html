@@ -6,14 +6,26 @@
 
 <script>
   // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-    authDomain: "miraclemessages-v2.firebaseapp.com",
-    databaseURL: "https://miraclemessages-v2.firebaseio.com",
-    projectId: "miraclemessages-v2",
-    storageBucket: "miraclemessages-v2.appspot.com",
-    messagingSenderId: "669586730683"
-  };
+  /*
+   var config = {
+   apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+   authDomain: "miraclemessages-v2.firebaseapp.com",
+   databaseURL: "https://miraclemessages-v2.firebaseio.com",
+   projectId: "miraclemessages-v2",
+   storageBucket: "miraclemessages-v2.appspot.com",
+   messagingSenderId: "669586730683"
+   };
+   */
+var config = {
+	apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+	authDomain: "miqestaq-demo.firebaseapp.com",
+	databaseURL: "https://miqestaq-demo.firebaseio.com",
+	projectId: "miqestaq-demo",
+	storageBucket: "miqestaq-demo.appspot.com",
+	messagingSenderId: "400510099187"
+};
+
+
   app = firebase.initializeApp(config);
 </script>
 
@@ -25,11 +37,10 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
 
-
 <script lang="text/javascript">
 var db = firebase.database(app);
 var checkFrom = ""; // field to check from
-var query; // user input of what to check for
+var searchQuery; // user input of what to check for
 var auth = app.auth();
 var isAdmin = false;
 
@@ -60,13 +71,12 @@ auth.onAuthStateChanged(function(user) {
 // Give an error that the user is not admin, and redirect to the main page.
 function notAdmin() {
 	alert("not logged in as admin");
-	window.location.href = 'index.html';
+	window.location.href = 'login.html';
 }
 
 // Goes through the data, and adds it to the result if it matches the criteria
 function searchFilter(snapshot)
 {
-
     var contents = []; // stores results //
     allData = snapshot.val(); // get all data from Firebase //
 
@@ -74,136 +84,290 @@ function searchFilter(snapshot)
     for (k in allData)
     {
         oneCase = allData[k]; // one case from the database
-        var checking; // the query to satisfy
+		var checking = null; // the query to satisfy
+		var caseMatch = false;
 
-        // If searching by delivery status, the query is one of the statuses.
-        if (checkFrom === 'deliveryStatus'){
-           checking = oneCase.deliveryStatus;
-           if (checking == query){
-                contents.push(String(oneCase.caseID));
-           }
-        }
-        else {
-          // If searching by name, the query is a lowercase string of the name.
-            if (checkFrom === 'name'){
-              checking = String(oneCase.name).toLowerCase();
-          }
-          else if (checkFrom === 'volunteerName'){
-              checking = String(oneCase.volunteerName).toLowerCase();
-          }
-          // Add to list of results if it matches.
-          if (checking.includes(query.toLowerCase())){
-                    contents.push(String(oneCase.caseID));
-          }
-        }
+		switch (searchQuery["checkFrom"]) {
+		case "deliveryStatus":
+			// If searching by delivery status, the query is one of the statuses.
+			checking = oneCase.deliveryStatus;
+			caseMatch = (checking == searchQuery["qvalue"]);
+			break;
+
+		case "name":
+			// If searching by name, the query is a lowercase string of the name.
+			checking = String(oneCase.name).toLowerCase();
+			caseMatch = (checking.includes(searchQuery["qvalue"]));
+			break;
+			
+		case "volunteerName":
+			// If searching by volunteer, the query is a lowercase string of the name.
+			checking = String(oneCase.volunteerName).toLowerCase();
+			caseMatch = (checking.includes(searchQuery["qvalue"]));
+			break;
+
+		case "recordingDate":
+			// If searching by recording date, the query is yyyy-mm
+			checking = String(oneCase.recordingDate);
+			caseMatch = (checking.startsWith(searchQuery["qvalue"]));
+			break;
+
+		case "lastWorkedOn":
+			// If searching by last worked on date, the query is yyyy-mm
+			checking = String(oneCase.recordingDate);
+			caseMatch = (checking.startsWith(searchQuery["qvalue"]));
+			break;
+		}
+
+		if (caseMatch) {
+			contents.push(String(k));
+		}
     }
 
     // Get the HTML element that will store all our cases
     var dump = document.getElementById("results");
 
     // Link cases to their full logs and data so that they are viewable and editable.
-    var fixedCase = contents[0].replace(/\d+$/, "")
-    dump.innerHTML = '<tr><th><a href="edit.html?caseID=' + contents[0] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-    for (var i = 1; i < contents.length; i++) {
+	dump.innerHTML = "";
+    for (var i = 0; i < contents.length; i++) {
       fixedCase = contents[i].replace(/\d+$/, "")
-      dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + contents[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
+	  dump.innerHTML += '<tr class=\"nicerow\"><td><a href=\"javascript:setEditPane(\'edit.html?caseID=' + contents[i] + '&isAdmin=' + String(isAdmin) + '\');\">' + fixedCase + '</a> </td> </tr>';
     }
+}
+
+function setEditPane(toUrl)
+{
+	ePane = document.getElementById("editContent");
+	if (ePane)
+		ePane.src = toUrl;
 }
 
 // Search based on the category and query provided.
 function search()
 {
+	setEditPane("about:blank");	// clear edit pane of existing records
 
-    contents = "";
-
-    var dump = document.getElementById("results");
-
-    var myform = document.getElementById("newsearch");
-
-    query = myform.elements["query"].value // value of query
-    var fld = myform.elements["type"].value; // type of search
+	contents = "";
+	searchQuery = {searchFrom: "", checkFrom: "", qvalue: ""};
+	
+	var dump = document.getElementById("results");
+    var fld = document.getElementById("queryType").value; // type of search
+    var myYear = "", myMonth = "";
 
     switch(fld) {
-      // Search by client name
-      case 'client':
-        searchFrom = 'clients';
-        checkFrom = 'name';
+	// Search by client name
+	case 'client':
+		searchQuery.searchFrom = 'clients';
+		searchQuery.checkFrom = 'name';
+		searchQuery.qvalue = document.getElementById("nameValue").value.toLowerCase();
+		break;
+	
+	// Search by volunteer name
+	case 'volunteer':
+		searchQuery.searchFrom = 'volunteers';
+		searchQuery.checkFrom = 'volunteerName';
+		searchQuery.qvalue = document.getElementById("nameValue").value.toLowerCase();
+		break;
+
+	// Search by delivery status
+	case 'status':
+		searchQuery.searchFrom = 'cases';
+		searchQuery.checkFrom = 'deliveryStatus';
+		var sel = document.getElementById("s_s").value;
+		switch(sel) {
+		case 'undeliv': // undelivered
+			searchQuery.qvalue = 0; // value of query (global)
+			break;
+		case 'deliv': // delivered
+			searchQuery.qvalue = 1; // value of query (global)
+			break;
+		case 'need': // needs to be delivered
+			searchQuery.qvalue = -1; // value of query (global)
+			break;
+		case 'no': // no delivery
+			searchQuery.qvalue = -2; // value of query (global)
+			break;
+		}
         break;
 
-      // Search by volunteer name
-      case 'volunteer':
-        searchFrom = 'volunteers';
-        checkFrom = 'volunteerName';
-        break;
+	case 'case_date':
+		searchQuery.searchFrom = 'records';
+		searchQuery.checkFrom = 'recordingDate';
+		myYear = document.getElementById("yearValue").value;
+		myMonth = document.getElementById("monthValue").value;
+		if ((myYear.length == 4) && (myMonth.length == 2)) {
+			searchQuery.qvalue = myYear + "-" + myMonth;
+		} else {
+			window.alert("Please select a month and a year to search");
+			return;
+		}
+		break;
+		
+	case 'worked_on_date':
+		searchQuery.searchFrom = 'records';
+		searchQuery.checkFrom = 'lastWorkedOn';
+		myYear = document.getElementById("yearValue").value;
+		myMonth = document.getElementById("monthValue").value;
+		if ((myYear.length == 4) && (myMonth.length == 2)) {
+			searchQuery.qvalue = myYear + "-" + myMonth;
+		} else {
+			window.alert("Please select a month and a year to search");
+			return;
+		}
+		break;
 
-      // Search by delivery status
-      case 'status':
-        searchFrom = 'cases';
-        checkFrom = 'deliveryStatus';
-        var sel = myform.elements["s_s"].value
-        switch(sel) {
-          case 'undeliv': // undelivered
-            query = 0;
-            break;
-          case 'deliv': // delivered
-            query = 1;
-            break;
-          case 'need': // needs to be delivered
-            query = -1;
-            break;
-          case 'no': // no delivery
-            query = -2;
-            break;
-        }
-        break;
-      default:
-        break;
+	default:
+		break;
     }
 
-    var searchRef = db.ref(searchFrom);
+    var searchRef = db.ref(searchQuery.searchFrom);
 
     // Conduct the search in the database.
     searchRef.orderByKey().on("value",searchFilter);
 }
 
+function selectRespond(z)
+{
+	t3 = document.getElementById("title3");
+	t2 = document.getElementById("title2");
+	t2a = document.getElementById("title2a");
+	if (z.value=='status') {
+		t3.style.display='block';
+		t2.style.display='none';
+		t2a.style.display='none';
+	} else if ((z.value=='volunteer') || (z.value=='client')) {
+		t3.style.display='none';
+		t2.style.display='none';
+		t2a.style.display='block';
+	} else {
+		t3.style.display='none';
+		t2.style.display='block';
+		t2a.style.display='none';
+	}
+}
 </script>
 
+<style>
+	.queryTop {
+		height: 50px;
+		width: 100%;
+		display: flex;
+		background-color: #efe;
+	}
+	.topBox {
+		margin-top: 15px;
+		height: 35px;
+	}
+	.searchBottom {
+		width:	100%;
+		height: calc(100% - 50px);
+		float:	left;
+		display: flex;
+	}
+	.resultLeft {
+		width: 300px;
+		height:	100%;
+		background-image: url('search_results_blank.png');
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 300px 600px;
+	}
+	.nicerow {
+		height: 30px;
+		font-family: Helvetica;
+		background-color: #eec;
+	}
+	.editRight {
+		display: flex;
+		width:	calc(100% - 300px);
+		height:	100%;
+		background-image: url('case_results_blank.png');
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 300px 600px;
+	}
+	.contentRight {
+		width:		100%;
+		height:		100%;
+		margin:		0;
+		padding:	0;
+		border:		none;
+	}
+	.caseList {
+		border-collapse: collapse;
+		border-width: thick;
+		width: 100%;
+	}
+</style>
 
-<center><form id="newsearch">
-  Search by
-
-  <!-- Displays all the search options -->
-<select id="type" onchange="if (this.value=='status'){this.form['s_s'].style.visibility='visible';
-this.form['query'].style.visibility='hidden'}else {this.form['s_s'].style.visibility='hidden';
-this.form['query'].style.visibility='visible'};">
-<option value="" selected="selected">Select...</option>
-<option value="client">Client name</option>
-<option value="case_date">Date of case (MM/YY)</option> /* TODO */
-<option value="volunteer">Volunteer name</option>
-<option value="worked_on_date">Last worked on date (MM/YY)</option> /* TODO */
-<option value="status">Delivery status</option>
-</select>
-
-<input type="text" id="query" name="query" style="visibility:hidden;">
-<select id="s_s" name="s_s" style="visibility:hidden;">
-  <option value="undeliv">Undelivered</option>
-  <option value="deliv">Delivered</option>
-  <option value="need">Needs to be delivered</option>
-  <option value="no">No delivery</option>
-</select>
-<!-- On click, the search runs -->
-<input type="button" value="Search" onclick="search()">
-
-</form>
-
-<br>
-
-<!-- Results from the search displayed here. -->
-Results:<br/>
-<div style="height:400px; width:500px; overflow:auto; border:1px solid black">
-  <table id="results" style="width:40%">
-  </table>
+<!-- Displays all the search options -->
+<div class="queryTop">
+	<div id="title1" class="topBox">
+		&nbsp;Search&nbsp;by&nbsp;
+		<select id="queryType" onchange="selectRespond(this);">
+			<option value="" selected="selected">Select...</option>
+			<option value="client">Client name</option>
+			<option value="case_date">Date of case</option>
+			<option value="volunteer">Volunteer</option>
+			<option value="worked_on_date">Last worked on</option>
+			<option value="status">Delivery status</option>
+		</select>
+	</div>
+	<div id="title2" class="topBox" style="display:none;">
+		<select id="yearValue" name="yearValue">
+			<option value="" selected="selected">Select a year...</option>
+			<option value="2019">2019</option>
+			<option value="2018">2018</option>
+			<option value="2017">2017</option>
+			<option value="2016">2016</option>
+			<option value="2015">2015</option>
+			<option value="2014">2014</option>
+		</select>
+		<select id="monthValue" name="monthValue">
+			<option value="" selected="selected">Select a month...</option>
+			<option value="01">January</option>
+			<option value="02">February</option>
+			<option value="03">March</option>
+			<option value="04">April</option>
+			<option value="05">May</option>
+			<option value="06">June</option>
+			<option value="07">July</option>
+			<option value="08">August</option>
+			<option value="09">September</option>
+			<option value="10">October</option>
+			<option value="11">November</option>
+			<option value="12">December</option>
+		</select>
+	</div>
+	<div id="title2a" class="topBox" style="display:none;">
+		<label for="nameValue">&nbsp;&nbsp;,&nbsp;Name&nbsp;=&nbsp;&nbsp;&nbsp;</label>
+		<input type="text" id="nameValue" name="nameValue">
+	</div>
+	<div id="title3" class="topBox" style="display:none;">
+		<label for="s_s">&nbsp;&nbsp;,&nbsp;Status&nbsp;=&nbsp;&nbsp;&nbsp;</label>
+		<select id="s_s" name="s_s">
+			<option value="undeliv">Undelivered</option>
+			<option value="deliv">Delivered</option>
+			<option value="need">Needs to be delivered</option>
+			<option value="no">No delivery</option>
+		</select>
+	</div>
+	<div id="title4" class="topBox">
+		<!-- On click, the search runs -->
+		<input type="button" value="Search" onclick="search()">
+	</div>
 </div>
-</form></center>
+<div class="searchBottom">
+	<!-- Results from the search displayed here. -->
+	<div class="resultLeft">
+		<table id="results" class="caseList">
+		</table>
+	</div>
+	<div class="editRight">
+		<iframe id="editContent" class="contentRight" src="about:blank">
+		</iframe>
+	</div>
+</div>
+
 </body>
 </html>

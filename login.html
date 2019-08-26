@@ -1,0 +1,144 @@
+<html>
+<head>
+<title>Web App</title>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
+        
+<script>
+	/*
+	 var config = {
+	 apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+	 authDomain: "miraclemessages-v2.firebaseapp.com",
+	 databaseURL: "https://miraclemessages-v2.firebaseio.com",
+	 projectId: "miraclemessages-v2",
+	 storageBucket: "miraclemessages-v2.appspot.com",
+	 messagingSenderId: "669586730683"
+	 };
+	 */
+var config = {
+	apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+	authDomain: "miqestaq-demo.firebaseapp.com",
+	databaseURL: "https://miqestaq-demo.firebaseio.com",
+	projectId: "miqestaq-demo",
+	storageBucket: "miqestaq-demo.appspot.com",
+	messagingSenderId: "400510099187"
+};
+
+  var app = firebase.initializeApp(config);
+  const db = firebase.database();
+</script>
+
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        
+<script>
+    const buttonRipple = new MDCRipple(document.querySelector('.mdc-button'));
+    const textField = new MDCTextField(document.querySelector('.mdc-text-field'));
+    const floatLabel = new MDCFloatingLabel(document.querySelector('.mdc-floating-label'));
+    const notchedOut = new MDCNotchedOutline(document.querySelector('.mdc-notched-outline'));
+</script>
+
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-database.js"></script>
+
+<script lang="text/javascript">
+
+    var auth = app.auth();
+    var isAdmin = false;
+
+    function signin_good(data)
+    {
+        const user = data.user;
+
+        if (user) {
+    		const userTypeRef = db.ref('usertypes/' + user.uid + '/type');
+    		userTypeRef.once('value').then(function(snapshot) {
+    			if (snapshot.val() == 'admin') {
+                    // Send the user to the admin page.
+    				isAdmin = true;
+                    console.log('the user is admin');
+    				console.log('user: ' + user);
+                    window.location.href = "adminHome.html";
+    			}
+    			else {
+                    // Send the user to the volunteer page.
+    				console.log("the user is not admin");
+                    window.location.href = "volunteerHome.html";
+    			}
+    		});
+    	}
+    	else {
+            // Redirect to the login page.
+    		console.log("the user is not logged in");
+            window.location.href = "login.html";
+    	}
+    }
+
+    function signin_catch(error)
+    {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        var et = document.getElementById("errText");
+        errText.value = error.message;
+    }
+
+    function signin()
+    {
+        var email = document.getElementById("myname").value;
+        var pword = document.getElementById("mypass").value;
+        auth.signInWithEmailAndPassword(email, pword).catch(signin_catch).then(signin_good);
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(
+          function(){return auth.signInWithEmailAndPassword(email,pword).catch(signin_catch);});
+    }
+  </script>
+
+<center>
+  <div id="login">
+      <br/><br/>
+      
+      <div class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--focused" style="width:500px;">
+          <input type="text" id="myname" class="mdc-text-field__input">
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+              <div class="mdc-notched-outline__leading"></div>
+              <div class="mdc-notched-outline__notch" style="width: 46px;">
+                  <label class="mdc-floating-label mdc-floating-label--float-above" for="myname" style="">E-mail</label>
+              </div>
+              <div class="mdc-notched-outline__trailing"></div>
+          </div>
+      </div>
+      
+      <br/><br/>
+      
+      <div class="mdc-text-field text-field mdc-text-field--outlined mdc-text-field--focused" style="width:500px;">
+          <input type="password" id="mypass" class="mdc-text-field__input">
+              <div class="mdc-notched-outline mdc-notched-outline--upgraded mdc-notched-outline--notched">
+              <div class="mdc-notched-outline__leading"></div>
+              <div class="mdc-notched-outline__notch" style="width: 64px;">
+                  <label class="mdc-floating-label mdc-floating-label--float-above" for="mypass" style="">Password</label>
+              </div>
+              <div class="mdc-notched-outline__trailing"></div>
+          </div>
+      </div>
+      
+      <br/><br/>
+      
+      <button class="mdc-button" onclick="signin()" style="height:40px;">
+          <span class="mdc-button--raised"><br/>Sign in, Please<br/>&nbsp;</span>
+      </button>
+      
+      <br/><br/>
+      
+      <div class="mdc-text-field mdc-text-field--disabled">
+          <input type="text" id="errText" class="mdc-text-field__input" disabled style="width: 640px;">
+      </div>
+      
+  </div>
+</center>
+
+</body>
+</html>

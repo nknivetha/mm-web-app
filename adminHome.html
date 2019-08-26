@@ -5,6 +5,7 @@
 <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase.js"></script>
 <script>
 	// Initialize Firebase
+/*
 	var config = {
 		apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
 		authDomain: "miraclemessages-v2.firebaseapp.com",
@@ -13,9 +14,81 @@
 		storageBucket: "miraclemessages-v2.appspot.com",
 		messagingSenderId: "669586730683"
 	};
+ */
+var config = {
+	apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+	authDomain: "miqestaq-demo.firebaseapp.com",
+	databaseURL: "https://miqestaq-demo.firebaseio.com",
+	projectId: "miqestaq-demo",
+	storageBucket: "miqestaq-demo.appspot.com",
+	messagingSenderId: "400510099187"
+};
+
 	var app = firebase.initializeApp(config);
 	const db = firebase.database();
 </script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<style>
+/* fallback */
+@font-face {
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url(https://fonts.gstatic.com/s/materialicons/v47/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+
+.divmenu {
+	width:	100%;
+	height:	44px;
+	vertical-align: center;
+	align: center;
+	background-color: #cceeee;
+	border: thin black solid;
+
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+.divmenuselect {
+	width:	100%;
+	height:	44px;
+	vertical-align: center;
+	align: center;
+	background-color: #ff9999;
+	border: thin black solid;
+	
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+.divmenu:hover {
+	background-color: #eeeecc;
+}
+</style>
 
 </head>
 <body>
@@ -57,31 +130,49 @@ auth.onAuthStateChanged(function(user) {
 // Give an error that the user is not admin, and redirect to the main page.
 function notAdmin() {
 	alert("not logged in as admin");
-	window.location.href = 'index.html';
+	window.location.href = 'login.html';
 }
 
 // Functions to take you to various pages when the admin clicks on the
 // various page buttons
 
+function setDivColors(selected)
+{
+	acac = document.getElementById("divSearch").className = "divmenu";
+	acac = document.getElementById("divAddRec").className = "divmenu";
+	acac = document.getElementById("divStatus").className = "divmenu";
+	acac = document.getElementById("divNewUsr").className = "divmenu";
+	
+	acac = document.getElementById(selected).className = "divmenuselect";
+}
+
 // Takes you to admin search
 function visitSearch(){
-	window.location='search.html';
+	acac = document.getElementById("adminContent");
+	acac.src = "search.html";
+	setDivColors("divSearch");
 }
 
 // Takes you to Miracle Message's add a new case form
 function visitAdd(){
-	window.location='https://miraclemessages.org/refer';
+	acac = document.getElementById("adminContent");
+	acac.src = "https://airtable.com/embed/shrgHFnsH4401uDDu?backgroundColor=yellow";
+	setDivColors("divAddRec");
 }
 
 // Takes you to review proposed updates page (for changes made to a case
 // status)
 function visitReviewUpdates(){
-  window.location='review_updates.html';
+	acac = document.getElementById("adminContent");
+	acac.src = "review_updates.html";
+	setDivColors("divStatus");
 }
 
 // Takes you to create a new user account page
 function visitCreateUser(){
-  window.location='create_user.html';
+	acac = document.getElementById("adminContent");
+	acac.src = "create_user.html";
+	setDivColors("divNewUsr");
 }
 
 
@@ -93,7 +184,7 @@ function signoutGood() {
   // the login page
   if (user == null) {
   	alert ("Successfully signed out");
-  	window.location.href = "index.html";
+  	window.location.href = "login.html";
   }
 }
 
@@ -102,7 +193,7 @@ function signoutError(error){
 	// Get the error message and alert the user
 	var errorCode = error.code;
 	var errorMessage = error.message;
-	alert(error.message);
+	//alert(error.message);
 }
 
 // Signs out the current user
@@ -113,13 +204,43 @@ function signout(){
 }
 
 </script>
+<style>
+	.leftHalf {
+		width:	180px;
+		height:	calc(100% - 20px);
+		background-color:	#cceecc;
+		padding:	10;
+		float:	left;
+	}
+	.rightHalf {
+		display: flex;
+		width:	calc(100% - 200px);
+		height:	100%;
+	}
+</style>
 
-	<!-- Buttons to navigate to different pages -->
-	<button type="button" id="search" onclick="visitSearch()">Search</button>
-  <button type="button" id="add" onclick="visitAdd()">Add</button>
-  <button type="button" id="status updates" onclick="visitReviewUpdates()">Status Updates</button>
-  <button type="button" id="create user" onclick="visitCreateUser()">Create New User</button>
-  <button type="button" id="sign out" onclick="signout()">Sign Out</button>
-
+<div class="leftHalf">
+	<center>
+	<div id="divSearch" class="divmenu material-icons" onclick="visitSearch()">
+		<h4>SEARCH CASES</h4>
+	</div>
+	<div id="divAddRec" class="divmenu material-icons" onclick="visitAdd()">
+		<h4>ADD CASE</h4>
+	</div>
+	<div id="divStatus" class="divmenu material-icons" onclick="visitReviewUpdates()">
+		<h4>STATUS UPDATES</h4>
+	</div>
+	<div id="divNewUsr" class="divmenu material-icons" onclick="visitCreateUser()">
+		<h4>CREATE NEW USER</h4>
+	</div>
+	<div class="divmenu material-icons" onclick="signout()">
+		<h4>SIGN OUT</h4>
+	</div>
+	<center>
+</div>
+<div class="rightHalf">
+	<iframe id="adminContent" src="./commonHome.html" style="width:100%; height:100%;">
+	</iframe>
+</div>
 </body>
 </html>

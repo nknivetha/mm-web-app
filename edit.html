@@ -2,8 +2,10 @@
 
 <html>
 <head>
-
-    <title>View and Edit</title>
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<title>View and Edit</title>
 </head>
 
 <body>
@@ -13,20 +15,33 @@
     <script src="https://www.gstatic.com/firebasejs/5.8.1/firebase-auth.js"></script>
 
     <script>
-        var config = {
-            apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-            authDomain: "miraclemessages-v2.firebaseapp.com",
-            databaseURL: "https://miraclemessages-v2.firebaseio.com",
-            projectId: "miraclemessages-v2",
-            storageBucket: "miraclemessages-v2.appspot.com",
-            messagingSenderId: "669586730683"
-        };
+		/*
+		 var config = {
+		 apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+		 authDomain: "miraclemessages-v2.firebaseapp.com",
+		 databaseURL: "https://miraclemessages-v2.firebaseio.com",
+		 projectId: "miraclemessages-v2",
+		 storageBucket: "miraclemessages-v2.appspot.com",
+		 messagingSenderId: "669586730683"
+		 };
+		 */
+		var config = {
+			apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+			authDomain: "miqestaq-demo.firebaseapp.com",
+			databaseURL: "https://miqestaq-demo.firebaseio.com",
+			projectId: "miqestaq-demo",
+			storageBucket: "miqestaq-demo.appspot.com",
+			messagingSenderId: "400510099187"
+		};
+	
         app = firebase.initializeApp(config);
     </script>
 
     <!-- Import headerToColl (dictionary), getURLParams, formatWords,
-         escapeSingleQuotes, appendHTML, addFromRef, getData -->
-    <script src='utils/database.js'></script>
+         escapeSingleQuotes, appendHTML, addFromRef, getData
+	<script src='./utils/database.js'></script> -->
+	<script src='./utils/mmCaseFromDb.js'></script>
+	<script src='./utils/mmEditFromCase.js'></script>
 
     <script>
         // Initialize Firebase
@@ -65,15 +80,17 @@
 
             for (let i = 0; i < fields.length; i++) {
                 // Find the firebase collection that this field is in.
-                parentColl = headerToColl[fields[i].parentNode.id];
-
-                // Check if this field was changed.
-                let path = parentColl + '/' + fields[i].id;
-
-                if (originalData[path] != fields[i].value) {
-                    // This field was changed.
-                    alteredData[path] = fields[i].value;
-                }
+                //	parentColl = headerToColl[fields[i].parentNode.id];
+				
+				// Check if this field was changed.
+				//	let path = parentColl + '/' + fields[i].id;
+				let path = fields[i].id;
+				if (path != "dpath") {
+					if (originalData[path] != fields[i].value) {
+						// This field was changed.
+						alteredData[path] = fields[i].value;
+					}
+				}
             }
 
             console.log('get altered data: altered data:', alteredData);
@@ -87,14 +104,17 @@
 
             // Collect the current date time
             var today = new Date;
-            var sec = today.getSeconds();
-            var min = today.getMinutes();
-            var hr = today.getHours();
-            var day = today.getDate();
+            var sec = today.getSeconds().toString().padStart(2,"0");
+            var min = today.getMinutes().toString().padStart(2,"0");
+            var hr = today.getHours().toString().padStart(2,"0");
+            var day = today.getDate().toString().padStart(2,"0");
             var month = today.getMonth() + 1;
+            month = month.toString().padStart(2,"0");
             var year = today.getFullYear();
 
-            var dateTime = hr + ':' + min + ':' + sec + '::' + month + '/' + day + '/' + year;
+            // standardize datetimes to yyyy-mm-dd hh:mm:ss for easier searching
+
+            var dateTime = year + month + '/' + day + '/' + ' ' + hr + ':' + min + ':' + sec;
 
             db.ref('proposed/id').once('value').then(function(snapshot) {
                 // Get the next proposal ID. The '+ 1 - 1' is to convert null
@@ -132,7 +152,7 @@
                         db.ref('proposed/' + proposalID).update({caseID: caseID});
 
                         // Update the proposal ID.
-                        proposalID += 1
+                        proposalID += 1;
                         db.ref('proposed').update({id: proposalID});
                     }
                 }
@@ -157,19 +177,82 @@
             writeData(fields);
             alert("Successfully saved changes");
         }
-
+	
+		// debug only
+		var dumpText = "";
+		var dumpPath = "";
+		
+		function appendDump(snapshot) {
+			dumpText += JSON.stringify(snapshot.val(),null,"    ");
+			var dd = document.getElementById("dumpData");
+			dd.innerHTML = dumpText;
+		}
+		function dump(){
+			dumpPath = document.getElementById("dpath").value;
+			if (dumpPath) {
+				dumpText = "";
+				var rootRef = db.ref(dumpPath);
+				rootRef.once('value').then(appendDump);
+			}
+		}
+		// end debug
+	
         // Load a case.
-        getData(caseID, originalData);
-    </script>
+//		getData(caseID, originalData);
+		// First create the edit dialog from the template, not the raw data
 
-    <div id='Case Overview'></div>
+		function WaitForCase() {
+			return new Promise(resolve => {setTimeout(() => {resolve(1);}, 2000); });
+		}
+
+		async function MakeTheCase() {
+			// get case data from the database
+			originalData = MakeCaseFromDB(caseID,db);
+
+			// wait for data to accumulate (pseudo-synchronous)
+			while (originalData.unkeptPromises > 0) {
+				await WaitForCase();
+			}
+
+			// fill dialog from completed data
+			MakeEditFromCase(originalData);
+		}
+
+		MakeTheCase();
+	</script>
+	<style>
+		input {width: 400px;}
+		.altColor2 {background-color: #eef; border-color: #eef;}
+		.altColor1 {background-color: #ddf; border-color: #ddf;}
+		.caseTable {border-collapse: collapse; border-width: thick;}
+		.tallButton {height:30px;}
+	</style>
+<!--//
+	<div id='Case Overview'></div>
     <div id='Client'></div>
     <div id='Loved Ones'></div>
     <div id='Notes'></div>
     <div id='Records'></div>
     <div id='Volunteer'></div>
-
-    <button type="button" id="edit" onclick=enableEdit()>Edit</button>
-    <button type="button" id="save" onclick=save()>Save</button>
+//-->
+	<table id="CaseData" class="caseTable">
+		<tr class="altColor2"><td colspan=2>
+			<center><h2>Info for case <span id="caseID">...</span>
+				<button type="button" class="tallButton" id="edit" onclick="enableEdit()">Edit</button>
+				<button type="button" class="tallButton" id="save" onclick="save()">Save</button>
+			</h2></center>
+		</td></tr>
+	</table>
+<!--//
+	<hr>
+	
+	Debug: <input id="dpath"> <button type="button" id="debug" onclick="dump()">Dump</button>
+	<textarea id="dumpData" rows=40 cols=120 readonly></textarea>
+ //-->
 </body>
 </html>
+<script>
+	var theCase = document.getElementById("caseID");
+	if (theCase)
+		theCase.innerHTML = caseID;
+</script>

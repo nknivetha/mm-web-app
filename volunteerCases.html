@@ -6,14 +6,26 @@
 
 <script>
   // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
-    authDomain: "miraclemessages-v2.firebaseapp.com",
-    databaseURL: "https://miraclemessages-v2.firebaseio.com",
-    projectId: "miraclemessages-v2",
-    storageBucket: "miraclemessages-v2.appspot.com",
-    messagingSenderId: "669586730683"
-  };
+  /*
+   var config = {
+   apiKey: "AIzaSyDkJap-l-nEEa8_Up_fRyBKadFLO8PzKQM",
+   authDomain: "miraclemessages-v2.firebaseapp.com",
+   databaseURL: "https://miraclemessages-v2.firebaseio.com",
+   projectId: "miraclemessages-v2",
+   storageBucket: "miraclemessages-v2.appspot.com",
+   messagingSenderId: "669586730683"
+   };
+   */
+var config = {
+	apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+	authDomain: "miqestaq-demo.firebaseapp.com",
+	databaseURL: "https://miqestaq-demo.firebaseio.com",
+	projectId: "miqestaq-demo",
+	storageBucket: "miqestaq-demo.appspot.com",
+	messagingSenderId: "400510099187"
+};
+
+
   app = firebase.initializeApp(config);
 </script>
 
@@ -46,7 +58,7 @@ auth.onAuthStateChanged(function(user) {
   // Otherwise, alert the user they're not logged in and redirect to login page
   else {
     alert("not logged in");
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
   }
 });
 
@@ -88,72 +100,121 @@ function searchFilter(snapshot)
   // cases.
   userTypeRef = db.ref('usertypes/' + auth.currentUser.uid + '/type');
   userTypeRef.once('value').then(function(snapshot) {
-      const getUnassigned = (snapshot.val() == 'admin' || snapshot.val() == 'super');
-      console.log('user can view unassinged cases: ' + getUnassigned);
+	const getUnassigned = (snapshot.val() == 'admin' || snapshot.val() == 'super');
+	console.log('user can view unassinged cases: ' + getUnassigned);
 
-      // Go through each case and see if the case matches the search criteria
-      for (k in allData) {
-        // Get an individual case (recall data stored as a JSON obj in Firebase)
-        oneCase = allData[k];
+	// Go through each case and see if the case matches the search criteria
+	for (k in allData) {
+		// Get an individual case (recall data stored as a JSON obj in Firebase)
+		oneCase = allData[k];
 
-        // Specific field we are checking to see if it matches the search criteria
-        // (here, the volunteer's contact info field)
-        var checking = String(oneCase.volunteerContactInfo).toLowerCase();
+		// Specific field we are checking to see if it matches the search criteria
+		// (here, the volunteer's contact info field)
+		var checking = String(oneCase.volunteerContactInfo).toLowerCase();
 
-        // Check if the volunteer's contact info contains the user's email addr
-        // If so - add the caseID to our assigned cases array
-        if (checking.includes(query.toLowerCase())) {
-          assigned.push(String(oneCase.caseID));
-        }
+		// Check if the volunteer's contact info contains the user's email addr
+		// If so - add the caseID to our assigned cases array
+		if (checking.includes(query.toLowerCase())) {
+		  assigned.push(String(k));
+		}
 
-        // Otherwise, check if the volunteer's contact info is blank (i.e. the
-        // case is unassigned), add the caseID to our unassigned cases array
-        else if (getUnassigned && checking === "") {
-          unassigned.push(String(oneCase.caseID));
-        }
-      }
+		// Otherwise, check if the volunteer's contact info is blank (i.e. the
+		// case is unassigned), add the caseID to our unassigned cases array
+		else if (getUnassigned && checking === "") {
+		  unassigned.push(String(k));
+		}
+	}
 
-      // Get the HTML element that will store all our cases
-      var dump = document.getElementById("results");
+	// Get the HTML element that will store all our cases
+	var dump = document.getElementById("results");
+	dump.innerHTML = "";
 
-      // Take each assigned case and display it in our HTML cases table
-      for (var i = 0; i < assigned.length; i++) {
-        // First, handle formatting for the caseID so it can be used to create a
-        // hyperlink to the edit page for that case
-        fixedCase = assigned[i].replace(/\d+$/, "")
+	// Take each assigned case and display it in our HTML cases table
+	for (var i = 0; i < assigned.length; i++) {
+		// First, handle formatting for the caseID so it can be used to create a
+		// hyperlink to the edit page for that case
+		fixedCase = assigned[i].replace(/\d+$/, "")
 
-        // Add a row in the case table to display the specific case
-        dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + '</a> </th> </tr>';
-      }
+		// Add a row in the case table to display the specific case
+		dump.innerHTML += '<tr class=\"nicerow\"><th><a href=\"javascript:setEditPane(\'edit.html?caseID=' + assigned[i] + '&isAdmin=' + String(isAdmin) + '\');\">' + fixedCase + '</a> </th> </tr>';
+		}
 
-      // Take each unassigned case and display it in our HTML cases table
-      for (var i = 0; i < unassigned.length; i++) {
-        // First, handle formatting for the caseID so it can be used to create a
-        // hyperlink to the edit page for that case
-        fixedCase = unassigned[i].replace(/\d+$/, "")
+		// Take each unassigned case and display it in our HTML cases table
+		for (var i = 0; i < unassigned.length; i++) {
+		// First, handle formatting for the caseID so it can be used to create a
+		// hyperlink to the edit page for that case
+		fixedCase = unassigned[i].replace(/\d+$/, "")
 
-        // Add a row in the case table to display the specific case
-        dump.innerHTML += '<tr><th><a href="edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '">' + fixedCase + ' (case unassigned) </a> </th> </tr>';
-      }
-    });
+		// Add a row in the case table to display the specific case
+		dump.innerHTML += '<tr class=\"nicerow\"><th><a href=\"javascript:setEditPane(\'edit.html?caseID=' + unassigned[i] + '&isAdmin=' + String(isAdmin) + '\');\">' + fixedCase + ' (case unassigned) </a> </th> </tr>';
+		}
+	});
 }
 
-
+function setEditPane(toUrl)
+{
+	ePane = document.getElementById("editContent");
+	if (ePane)
+		ePane.src = toUrl;
+}
 </script>
 
 <!-- Run getCases() when the page loads to search the database and get
      relevant cases for the volunteer -->
 <body onload="getCases();">
 
-<center>
+<style>
+.searchBottom {
+	width:	100%;
+	height: 100%;
+	float:	left;
+	display: flex;
+}
+.resultLeft {
+	width: 300px;
+	height:	100%;
+	background-image: url('search_results_blank.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 300px 600px;
+}
+.nicerow {
+	height: 30px;
+	font-family: Helvetica;
+	background-color: #eec;
+}
+.editRight {
+	display: flex;
+	width:	calc(100% - 300px);
+	height:	100%;
+	background-image: url('case_results_blank.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 300px 600px;
+}
+.contentRight {
+	width:		100%;
+	height:		100%;
+	margin:		0;
+	padding:	0;
+	border:		none;
+}
+.caseList {
+	border-collapse: collapse;
+	border-width: thick;
+	width: 100%;
+}
+</style>
 
-<br>
-
-<!-- Displays all the relevant cases for the volunteer -->
-Cases:<br/>
-<div style="height:400px; width:800px; overflow:auto; border:1px solid black">
-  <table id="results" style="width:70%">
-  </table>
+<div class="searchBottom">
+	<div class="resultLeft">
+		<table id="results" class="caseList">
+		</table>
+	</div>
+	<div class="editRight">
+		<iframe id="editContent" class="contentRight" src="about:blank">
+		</iframe>
+	</div>
 </div>
 
 </body>

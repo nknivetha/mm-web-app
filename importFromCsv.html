@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Import MM Case SpreadSheet</title>
+<head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.0/firebase.js"></script>
+
+<script>
+	var config = {
+		apiKey: "AIzaSyC_eHILdOab_SH3X3dO0c89r4Fffs-lGs0",
+		authDomain: "miqestaq-demo.firebaseapp.com",
+		databaseURL: "https://miqestaq-demo.firebaseio.com",
+		projectId: "miqestaq-demo",
+		storageBucket: "miqestaq-demo.appspot.com",
+		messagingSenderId: "400510099187"
+	};
+
+	var app = firebase.initializeApp(config);
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-database.js"></script>
+
+<script src="./utils/mmCaseFromCsv.js"></script>
+
+<script>
+	var db = firebase.database(app);
+	var auth = firebase.auth(app);
+	
+	auth.onAuthStateChanged(areWeLoggedIn);
+	
+	function areWeLoggedIn(u)
+	{
+		if (u == null) {
+			window.location.href = "login.html";
+		} else {
+			UE = document.getElementById("email");
+			UE.value = u.email;
+		}
+	}
+
+	function signout_good() {window.location.href = "login.html";}
+	function signout_bad(error) {window.location.href = "login.html"; }
+	function signout() {
+		auth.signOut().then(signOut_good).catch(signOut_bad);
+	}
+
+	function goSearch()
+	{
+		window.location.href = "search.html";
+	}
+
+	function goInsert()
+	{
+		window.location.href = "insert.html";
+	}
+
+	function insert_error(error)
+	{
+		if (error) {
+			var j = document.getElementById("dump");
+			j.value += error.message;
+		}
+	}
+
+	function setPermissions() {
+		db.ref("usertypes/VBsngdZkRYNNM5f8cdUjoOJQkfz1").set({"type":"admin"},insert_error);
+		db.ref("usertypes/pQlRIR10beO2kG7jjQnnZvgHJ3D2").set({"type":"volunteer"},insert_error);
+	}
+
+	function absorbRecord(csvRec) {
+		var addRecord = MakeCaseFromCsv(csvRec);
+		
+		if (addRecord === null) return;
+		
+		var ID = addRecord.caseID;
+		
+		try {
+			// need to skip DB step when object is empty
+			db.ref("clients/"+ID).set(addRecord.clientData,insert_error);
+			db.ref("loved_ones/"+ID).set(addRecord.loData,insert_error);
+			db.ref("records/"+ID).set(addRecord.recordData,insert_error);
+			db.ref("notes/"+ID).set(addRecord.noteData,insert_error);
+			db.ref("cases/"+ID).set(addRecord.caseData,insert_error);
+			db.ref("volunteers/"+ID).set(addRecord.volunteerData,insert_error);
+		}
+		catch (err) {
+			window.alert(err.message);
+		}
+	}
+
+	function clearDatabase()
+	{
+		;
+	}
+</script>
+
+<script src="papaparse.js"></script>
+
+<script>
+	var reader;
+	var pickedFile;
+	var rowsRead = 0;
+	
+	function showResults(results, parser) {
+		if (++rowsRead > 2) {
+			var jbit = {};
+			for (let elem in results.data) {
+				var jvalue = results.data[elem];
+				if (jvalue != null)
+					jbit["C"+elem] = jvalue;
+			}
+			//dump.innerHTML += (JSON.stringify(jbit) + "\n\n");
+			if (jbit["C0"]) {
+				absorbRecord(jbit);
+
+				var fred = document.getElementById("dump");
+				dump.innerHTML = "Rows read: " + (rowsRead-2);
+			}
+		}
+	}
+
+	function handleFileSelect(evt) {
+		pickedFile = evt.target.files[0];
+	}
+
+	function parseFile() {
+		var myconfig = {
+			header: false,
+			dynamicTyping: true,
+			skipEmptyLines: true,
+			step: showResults
+		};
+
+		Papa.parse(pickedFile,myconfig);
+	}
+</script>
+
+Welcome, <input type="text" id="email" readonly>&nbsp;&nbsp;
+<input type="button" value="Sign out" onclick="signout()">&nbsp;&nbsp;
+<input type="button" value="Insert or Update" onclick="goInsert()">&nbsp;&nbsp;
+<input type="button" value="Search" onclick="goSearch()"><br/><br/>
+				
+<h3>Import or Reset</h3><br/><br/>
+
+<input type="file" id="csvfile" name="csvfile" /> &nbsp; &nbsp;
+<button id="goParse" onclick="parseFile()">Parse It</button> &nbsp; &nbsp;
+<button id="setPerm" onclick="setPermissions()">Set Perms</button> <br/>
+<textarea id="dump" name="dump" height="80" width="120"></textarea>
+
+</body>
+</html>
+<script>
+	document.getElementById('csvfile').addEventListener('change', handleFileSelect, false);
+</script>
+
